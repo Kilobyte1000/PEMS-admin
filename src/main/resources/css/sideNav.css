@@ -1,0 +1,18 @@
+.nav {
+    -fx-background-color: #1ecc71;
+}
+
+.nav .button {
+    -fx-background-color: transparent;
+    -fx-font-size: 19;
+    -fx-fit-to-width: true;
+    -fx-border-radius: 0;
+    -fx-border-width: 0;
+}
+
+.nav .button.active {
+    -fx-border-color: accent_color;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #000;
+    -fx-font-weight: 700;
+}

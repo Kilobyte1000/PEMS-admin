@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
+
+<!--<?import edu.opjms.candidateSelector.controls.Button?>-->
+
+<HBox stylesheets="@../css/resultView.css" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="623.0" prefWidth="830.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.opjms.resultView.main.listViewController">
+   <VBox prefHeight="374.0" prefWidth="230.0" styleClass="nav" stylesheets="@../css/sideNav.css" VBox.vgrow="ALWAYS">
+      <Label graphicTextGap="11.0" maxHeight="Infinity" maxWidth="Infinity" text="Select House" HBox.hgrow="ALWAYS">
+         <VBox.margin>
+            <Insets bottom="15.8" left="9.5" top="43.5" />
+         </VBox.margin>
+         <font>
+            <Font name="System Bold" size="21.0" />
+         </font>
+         <graphic>
+            <SVGPath content="M 4 7 L 4 9 L 28 9 L 28 7 Z M 4 15 L 4 17 L 28 17 L 28 15 Z M 4 23 L 4 25 L 28 25 L 28 23 Z" fillRule="EVEN_ODD" pickOnBounds="true" />
+         </graphic>
+      </Label>
+      <Button alignment="BASELINE_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="50.0" text="Tilak" textAlignment="RIGHT" />
+      <Button alignment="BASELINE_LEFT" layoutX="10.0" layoutY="81.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="50.0" text="Kabir" textAlignment="RIGHT" />
+      <Button alignment="BASELINE_LEFT" layoutX="10.0" layoutY="132.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="50.0" text="Raman" textAlignment="RIGHT" />
+      <Button alignment="BASELINE_LEFT" layoutX="10.0" layoutY="182.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="50.0" text="Tagore" textAlignment="RIGHT" />
+      <Button alignment="BASELINE_LEFT" layoutX="10.0" layoutY="232.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="50.0" text="Vashishth" textAlignment="RIGHT" />
+      <Button alignment="BASELINE_LEFT" layoutX="10.0" layoutY="283.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" mnemonicParsing="false" prefHeight="50.0" text="Vivekanand" textAlignment="RIGHT" />
+   </VBox>
+   <GridPane hgap="15.0" vgap="15.0" HBox.hgrow="ALWAYS">
+     <columnConstraints>
+       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+     </columnConstraints>
+     <rowConstraints>
+       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+     </rowConstraints>
+      <children>
+         <PieChart fx:id="houseBoyChart" legendSide="RIGHT" />
+         <PieChart fx:id="houseGirlChart" legendSide="RIGHT" GridPane.columnIndex="1" />
+         <PieChart fx:id="sportsBoyChart" legendSide="RIGHT" GridPane.rowIndex="1" />
+         <PieChart fx:id="sportGirlChart" legendSide="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      </children>
+      <opaqueInsets>
+         <Insets />
+      </opaqueInsets>
+      <HBox.margin>
+         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+      </HBox.margin>
+   </GridPane>
+</HBox>
