@@ -1,36 +1,46 @@
 package edu.opjms.resultView.main;
 
-import javafx.fxml.FXML;
+import com.jfoenix.controls.JFXMasonryPane;
+import javafx.collections.FXCollections;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.PieChart;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import jfxtras.styles.jmetro.JMetro;
+import jfxtras.styles.jmetro.JMetroStyleClass;
+import jfxtras.styles.jmetro.Style;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class listViewController implements Initializable {
 
-    @FXML
-    private PieChart houseBoyChart;
-    @FXML
-    private PieChart houseGirlChart;
-    @FXML
-    private PieChart sportsBoyChart;
-    @FXML
-    private PieChart sportGirlChart;
+
+    public FlowPane a;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        houseBoyChart.getData().addAll(new PieChart.Data("Manan", 10),
-                new PieChart.Data("Rishit", 7),
-                new PieChart.Data("Mandeep", 4));
-        houseGirlChart.getData().addAll(new PieChart.Data("Kashish", 30),
-                new PieChart.Data("Tanya", 12),
-                new PieChart.Data("Archie", 1));
-        sportsBoyChart.getData().addAll(new PieChart.Data("Divyam", 4),
-                new PieChart.Data("Bhavyam", 8),
-                new PieChart.Data("Ishit", 0));
-        sportGirlChart.getData().addAll(new PieChart.Data("I ran out of Names",5),
-                new PieChart.Data("Someone", 12),
-                new PieChart.Data("Someone else", 2));
+        BarChart<Number, String> barChart = new BarChart<>(new NumberAxis(), new CategoryAxis());
+        a.getChildren().add(barChart);
+        List<XYChart.Data<Number, String>> b = List.of(new XYChart.Data<>(2, "Keshav"),
+                new XYChart.Data<>(3,"Aditya"),
+                new XYChart.Data<>(5,"Ojaswi"));
+
+        var c = FXCollections.observableArrayList(b);
+        barChart.getData().add(new XYChart.Series<>(
+                c
+        ));
+
+        a.getChildren().addAll(new BarChart<>(new NumberAxis(), new CategoryAxis()),
+                new BarChart<>(new NumberAxis(), new CategoryAxis()),
+                new BarChart<>(new NumberAxis(), new CategoryAxis()));
+
+        new JMetro(a.getParent(), Style.DARK);
+
     }
 }

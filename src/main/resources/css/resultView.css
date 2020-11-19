@@ -1,7 +1,22 @@
 PieChart {
-    -fx-background-color: #f4f4f4;
+    -fx-background-color: #f3f3f3;
+}
+
+.chart .chart-content .chart-pie-label-line {
+    -fx-stroke-line-cap: square;
+    -fx-stroke: derive(-fx-background, -40%);
+    -fx-stroke-width: 3;
+}
+
+.chart-legend .chart-legend-item {
+    -fx-font-size: 1.2em !important;
+}
+
+.chart-legend {
+    -fx-border-radius: 0 !important;
+    -fx-background-color: transparent, derive(-fx-background, -5%) !important;
 }
 
 HBox {
-    -fx-background-color: #dadbdc;
+    -fx-background-color: #e6e6e6 !important;
 }

@@ -2,10 +2,16 @@ package edu.opjms.candidateSelector.main;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
@@ -25,6 +31,7 @@ public class Main extends Application {
         var loader = new FXMLLoader(getClass().getResource("/fxml/listViewer.fxml"));
 //        var loader = new FXMLLoader(getClass().getResource("/fxml/resultView.fxml"));
         Parent root = loader.load();
+
         scene = new Scene(root);
 
         scene.setOnKeyPressed(keyEvent -> {
@@ -33,6 +40,7 @@ public class Main extends Application {
         });
         j = new JMetro(Style.LIGHT);
         j.setScene(scene);
+        
         stage.setTitle("Candidate List Editor");
         stage.setScene(scene);
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon/app_icon.png")));

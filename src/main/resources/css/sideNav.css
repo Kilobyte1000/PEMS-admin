@@ -3,7 +3,8 @@
 }
 
 .nav .button {
-    -fx-background-color: transparent;
+    -fx-background-color: #1ecc71;
+    /*-fx-background-color: inherit;*/
     -fx-font-size: 19;
     -fx-fit-to-width: true;
     -fx-border-radius: 0;
@@ -15,4 +16,10 @@
     -fx-border-width: 0 0 0 3;
     -fx-text-fill: #000;
     -fx-font-weight: 700;
+}
+
+.nav .button:focused {
+    -fx-border-color: black;
+    -fx-border-insets: 2;
+    -fx-border-width: 2, 0, 0;
 }

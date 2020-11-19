@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane fx:id="root" prefHeight="673.0" prefWidth="863.0" stylesheets="@../css/studentList.css" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.opjms.candidateSelector.main.CandidateListController">
+<BorderPane fx:id="root" prefHeight="673.0" prefWidth="863.0" maxHeight="Infinity" stylesheets="@../css/studentList.css" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.opjms.candidateSelector.main.CandidateListController">
     <top>
         <MenuBar>
             <effect>
