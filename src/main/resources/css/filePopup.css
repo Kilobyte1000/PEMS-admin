@@ -1,0 +1,37 @@
+HBox > .text-field {
+    -fx-font-size: 1.8em;
+    -fx-background-color: background_color, black, background_color !important;
+    -fx-background-insets: 0, 4, 2 2 5 2;
+    -fx-font-smoothing-type: gray !important;
+}
+
+HBox > .text-field .right-button {
+    -fx-background-color: none;
+    -fx-background-insets: -2 -2 2 -2;
+}
+
+/*.root > HBox {
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.5), 20, 1.1, 0, 5) !important;
+    order
+}*/
+
+.search-bar {
+    -fx-background-color: black;
+    -fx-padding: 3 0 5 3 !important;
+    /*-fx-effect: dropshadow(gaussian, black, 1, 1.0, 0.1, 0.1);*/
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 10, .12, -1, -2);
+}
+
+Hbox > SVGGlyph {
+    -fx-fill: #666;
+}
+
+.add-button {
+    -fx-font-size: 2em !important;
+    -fx-text-fill: #333333;
+}
+
+.list-view {
+    -fx-font-size: 1.2em;
+    -fx-font-smoothing-type: gray;
+}

@@ -7,28 +7,25 @@ import javafx.collections.ObservableList;
 public class UndoTaskAdd<T> extends UndoTasks<T> {
     private final T item;
 
-    public UndoTaskAdd(ObservableList<T> listItems, HouseIndex houseIndex, byte prefectPost, T item) {
-        super(listItems, houseIndex, prefectPost);
+    public UndoTaskAdd(HouseIndex houseIndex, byte prefectPost, T item) {
+        super(houseIndex, prefectPost);
         this.item = item;
     }
 
     @Override
-    public int[] undo() {
+    public void undo(ObservableList<T> listItems) {
         listItems.remove(item);
-        return this.returnUniquePost();
     }
 
     @Override
-    public int[] redo() {
+    public void redo(ObservableList<T> listItems) {
         listItems.add(item);
-        return this.returnUniquePost();
     }
 
     @Override
     public String toString() {
         return "UndoTaskAdd{" +
                 "item=" + item +
-                ", listItems=" + listItems +
                 '}';
     }
 }

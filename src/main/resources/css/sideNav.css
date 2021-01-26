@@ -3,7 +3,7 @@
 }
 
 .nav .button {
-    -fx-background-color: #1ecc71;
+    -fx-background-color: none;
     /*-fx-background-color: inherit;*/
     -fx-font-size: 19;
     -fx-fit-to-width: true;
@@ -11,15 +11,19 @@
     -fx-border-width: 0;
 }
 
+.nav .button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+}
+
 .nav .button.active {
     -fx-border-color: accent_color;
-    -fx-border-width: 0 0 0 3;
+    -fx-border-width: 0 0 0 3 !important;
     -fx-text-fill: #000;
     -fx-font-weight: 700;
+    -fx-border-insets: 2 !important;
 }
 
 .nav .button:focused {
     -fx-border-color: black;
-    -fx-border-insets: 2;
-    -fx-border-width: 2, 0, 0;
+    -fx-border-width: 2, 0;
 }

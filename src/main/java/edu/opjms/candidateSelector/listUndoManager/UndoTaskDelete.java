@@ -8,28 +8,25 @@ import java.util.Arrays;
 public class UndoTaskDelete<T> extends UndoTasks<T> {
     T[] deletedItems;
 
-    public UndoTaskDelete(ObservableList<T> listItems, HouseIndex houseIndex, byte prefectPost, T[] deletedItems) {
-        super(listItems, houseIndex, prefectPost);
+    public UndoTaskDelete(HouseIndex houseIndex, byte prefectPost, T[] deletedItems) {
+        super(houseIndex, prefectPost);
         this.deletedItems = deletedItems;
     }
 
     @Override
-    public int[] undo() {
-        this.listItems.addAll(deletedItems);
-        return this.returnUniquePost();
+    public void undo(ObservableList<T> listItems) {
+        listItems.addAll(deletedItems);
     }
 
     @Override
-    public int[] redo() {
-        this.listItems.removeAll(deletedItems);
-        return this.returnUniquePost();
+    public void redo(ObservableList<T> listItems) {
+        listItems.removeAll(deletedItems);
     }
 
     @Override
     public String toString() {
         return "UndoTaskDelete{" +
                 "deletedItems=" + Arrays.toString(deletedItems) +
-                ", listItems=" + listItems +
                 '}';
     }
 }

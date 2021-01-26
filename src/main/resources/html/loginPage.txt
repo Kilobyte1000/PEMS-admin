@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+
+	<title>Login</title>
+	<link rel='stylesheet' type='text/css' href='D:\Election\Webpage\re\login\style.css'>
+	<script type='text/javascript'>
+
+		function validateInput(argument) {
+			var e = event || window.event;
+  			var key = e.keyCode || e.which;
+			if( key == 69 || (key >=107  && key <= 110) || (key >= 187 && key <= 190) )
+				e.preventDefault();
+		}
+
+		function goToVotePage(event) {
+			event.preventDefault();
+			var select = document.getElementById('select-house');
+			var house = select.options[select.selectedIndex].value;
+
+			window.location.href = '../vote/'+house+'.html';
+		}
+	</script>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+</head>
+<body>
+
+	<header>
+		<img src='../vote/download5.jpg' alt='School logo' height='100'>
+		<div>op jindal modern school</div>
+	</header>
+
+
+	<main>
+
+		<form onsubmit='goToVotePage(event)'>
+
+			<p id='errPara'>
+			</p>
+
+			<section id='main'>
+			    <!--inputs-->
+			</section>
+
+            <button class='button'>Go To Voting Page</button>
+
+        </form>
+
+    </main>
+
+
+<footer>
+    Made by Keshav
+</footer>
+
+<script type='text/javascript' src='D:\Election\Webpage\re\login\errShow.js'></script>
+
+</body>
+</html>

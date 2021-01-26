@@ -1,0 +1,92 @@
+.titled-pane > .content {
+    -fx-border-width: 0, 0, 0 !important;
+    /*-fx-background-color: none !important;*/
+}
+
+.titled-pane > .title > .inner-title .text {
+    -fx-font-size: 1.6em;
+}
+
+.titled-pane > .title > .text {
+    -fx-font-size: 1.6em;
+}
+
+.inner-title Button {
+    -fx-padding: 6;
+}
+
+.inner-title Button:hover {
+    -fx-background-color: #400606, #b83030;
+    -fx-background-insets: 0, 2;
+}
+
+.inner-title SVGPath {
+    -fx-fill: #ca403f;
+}
+
+.inner-title Button:hover SVGPath {
+    -fx-fill: #d6d6d6;
+}
+
+.label, .titled-pane .button {
+    -fx-font-size: 1.3em !important;
+}
+
+.text-field, .text-area, .combo-box {
+    -fx-font-size: 1.2em !important;
+    -fx-background-radius: 3, 2;
+}
+
+
+/*noinspection SpellCheckingInspection*/
+.tooltip {
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 15, 0.16, 0, 4);*/
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 10, 0.12, -1, 2);
+    -fx-background-color: derive(background_color, -5%);
+}
+
+.combo-box {
+    -fx-font-size: 1.1em !important;
+    -fx-background-radius: 0, 3, 2 !important;
+}
+
+.combo-box:disabled {
+    -fx-opacity: 0.9 !important;
+}
+
+.combo-box > .combo-box-popup > .list-view {
+    -fx-border-width: 0 1 2 1 !important;
+    -fx-font-size: 1.2em;
+}
+.combo-box > .combo-box-popup > .list-view {
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.2), 20, 0.1, 0, 5) !important;
+}
+
+/*prevent blurry text*/
+.text-area > .scroll-pane {
+    -fx-padding: 0;
+}
+
+.menu-button {
+    -fx-border-radius: 4 !important;
+    -fx-background-radius: 4 !important;
+}
+
+.text-field .right-button {
+    -fx-background-insets: -0.1em -0.4em -0.1em -0.4em;
+}
+
+
+/* snack bar */
+.jfx-snackbar-layout {
+    -fx-background-color: #222;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: white;
+}
+
+.titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-border-color: #7a7a7a;
+    -fx-border-width: 1;
+}

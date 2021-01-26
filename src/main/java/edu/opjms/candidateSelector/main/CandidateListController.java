@@ -4,7 +4,6 @@ import edu.opjms.candidateSelector.animations.CustomFadeInUp;
 import edu.opjms.candidateSelector.controls.ActionButtonBase;
 import edu.opjms.candidateSelector.controls.ActionButtonDelete;
 import edu.opjms.candidateSelector.controls.ActionButtonDeleteAll;
-import edu.opjms.candidateSelector.controls.CustomMenuButton;
 import edu.opjms.candidateSelector.util.HouseIndex;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -16,7 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Line;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.FlatAlert;
@@ -35,11 +34,10 @@ import static edu.opjms.candidateSelector.controls.ActionButtonNew.DEFAULT_NAME;
 import static edu.opjms.candidateSelector.util.ListUtil.addNewItem;
 import static edu.opjms.candidateSelector.util.ListUtil.deleteSelectedItem;
 import static java.lang.Byte.parseByte;
-import static java.util.stream.IntStream.range;
 import static javafx.scene.control.ButtonBar.ButtonData.*;
 import static javafx.scene.control.cell.TextFieldListCell.forListView;
 
-public class CandidateListController implements Initializable {
+final public class CandidateListController implements Initializable {
 
     private final Model model = new Model();
     private final FileChooser fileChooser = new FileChooser();
@@ -47,17 +45,17 @@ public class CandidateListController implements Initializable {
     private Stage stage;
     private Button selectedButton;
     @FXML
+    private GridPane mainArea;
+    @FXML
     private BorderPane root;
     @FXML
-    private TabPane tabPane;
+    private Button houseTab;
     @FXML
-    private ListView<String> housePrefectBoyList;
+    private Button sportsTab;
     @FXML
-    private ListView<String> housePrefectGirlList;
+    private ListView<String> prefectBoyList;
     @FXML
-    private ListView<String> sportsPrefectBoyList;
-    @FXML
-    private ListView<String> sportsPrefectGirlList;
+    private ListView<String> prefectGirlList;
     @FXML
     private Button buttonTilak;
     @FXML
@@ -79,10 +77,13 @@ public class CandidateListController implements Initializable {
     @FXML
     private MenuItem deleteMenu;
     private CustomFadeInUp a;
-    private List<ListView<String>> prefectList;
     private List<Button> menuButtons;
     private FlatAlert saveConfirmDialog;
 
+    private final byte HOUSE_PREFECT_INDEX = 0;
+    private final byte SPORTS_PREFECT_INDEX = 2;
+
+    private byte selectedPost = HOUSE_PREFECT_INDEX;
 
     // Methods related to initialisation of controller
 
@@ -92,7 +93,7 @@ public class CandidateListController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         //Initialise prefectList
-        prefectList = List.of(housePrefectBoyList, housePrefectGirlList, sportsPrefectBoyList, sportsPrefectGirlList);
+        List<ListView<String>> prefectList = List.of(prefectBoyList, prefectGirlList);
 
         //Set Details Of all the ListViews
         prefectList.forEach(stringListView -> {
@@ -102,17 +103,35 @@ public class CandidateListController implements Initializable {
 
             stringListView.setOnEditCommit(this::validateListInput);
             stringListView.setOnEditCancel(stringEditEvent -> stringEditEvent.getSource().getItems().removeIf(s -> s.equals(DEFAULT_NAME)));
+
+            //set keyboard shortcuts
+            final byte listIndex = getIndexFromData(stringListView);
+            stringListView.setOnKeyPressed(keyEvent -> {
+
+                if (stringListView.getEditingIndex() == -1) { //if not editing
+                    switch (keyEvent.getCode()) {
+                        case DELETE -> {
+                            final var selectedItems = stringListView.getSelectionModel().getSelectedItems();
+                            if (!selectedItems.isEmpty()) {
+                                model.addUndoTaskDelete((byte) (selectedPost + listIndex), selectedItems.toArray(new String[0]));
+                                deleteSelectedItem(stringListView);
+                            }
+                        }
+                        case INSERT -> addNewItem(stringListView, DEFAULT_NAME);
+                    }
+                }
+
+                keyEvent.consume();
+
+            });
+
         });
 
         //Initialise the menus
-        deleteMenu.disableProperty().bind(Bindings.not(housePrefectBoyList.focusedProperty()
-                .or(housePrefectGirlList.focusedProperty())
-                .or(sportsPrefectBoyList.focusedProperty())
-                .or(sportsPrefectGirlList.focusedProperty())));
-        insertMenu.disableProperty().bind(Bindings.not(housePrefectBoyList.focusedProperty()
-                .or(housePrefectGirlList.focusedProperty())
-                .or(sportsPrefectBoyList.focusedProperty())
-                .or(sportsPrefectGirlList.focusedProperty())));
+        deleteMenu.disableProperty().bind(Bindings.not(prefectBoyList.focusedProperty()
+                .or(prefectGirlList.focusedProperty())));
+        insertMenu.disableProperty().bind(Bindings.not(prefectBoyList.focusedProperty()
+                .or(prefectGirlList.focusedProperty())));
 
 
         //Initialise Button List
@@ -142,14 +161,15 @@ public class CandidateListController implements Initializable {
         saveConfirmDialog.setHeaderText("Unsaved Changes found");
         new JMetro(saveConfirmDialog.getDialogPane(), Style.LIGHT);
 
+
     }
 
     public void setStage(Stage stage) {
         this.stage = stage;
         stage.setOnCloseRequest(this::fileSaveConfirmDialogHandle);
         stage.titleProperty().bind(Bindings.when(model.isDataSaved()).then("Candidate List Editor ").otherwise("*Candidate List Editor ").concat(fileName));
-    }
 
+    }
 
     //Methods related to listView validation
 
@@ -209,28 +229,29 @@ public class CandidateListController implements Initializable {
 
             //add the appropriate undoable task
             if (oldName.equals(DEFAULT_NAME))
-                model.addUndoTaskAdd(getIndexFromData(listView), name);
+                model.addUndoTaskAdd((byte) (selectedPost + getIndexFromData(listView)), name);
             else
-                model.addUndoTaskEdit(getIndexFromData(listView), oldName, name);
+                model.addUndoTaskEdit((byte) (selectedPost + getIndexFromData(listView)), oldName, name);
         } else {
             FlatAlert alert = new FlatAlert(Alert.AlertType.ERROR);
             switch (errCode) {
-                case 1:
+                case 1 -> {
                     alert.setHeaderText("Name Is Too Long");
                     alert.setContentText("The name should not be longer than 32 characters");
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     alert.setHeaderText("Invalid Name");
                     alert.setContentText("Name can only contain english letters and spaces");
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     alert.setHeaderText("Duplicate Name");
                     alert.setContentText("Names of candidates standing for same post must be unique\nTry adding or removing Initials");
                     alert.setResizable(true);
-                    break;
-                default:
+                }
+                default -> {
                     alert.setHeaderText("Bug Encountered");
                     alert.setContentText("This text was not supposed to be shown. its a bug");
+                }
             }
             new JMetro(alert.getDialogPane(), Style.LIGHT);
             listView.getItems().set(index, name);
@@ -251,16 +272,18 @@ public class CandidateListController implements Initializable {
 
         //Add undo tasks
         if (eventSource instanceof ActionButtonDelete)
-            model.addUndoTaskDelete(parseByte(list.getUserData().toString()), list.getSelectionModel().getSelectedItems().toArray(new String[0]));
+            model.addUndoTaskDelete((byte) (selectedPost + parseByte(list.getUserData().toString())),
+                    list.getSelectionModel().getSelectedItems().toArray(new String[0]));
         else if (eventSource instanceof ActionButtonDeleteAll) {
-            model.addUndoTaskDelete(parseByte(list.getUserData().toString()), list.getItems().toArray(new String[0]));
+            model.addUndoTaskDelete((byte) (selectedPost + parseByte(list.getUserData().toString())), list.getItems().toArray(new String[0]));
         }
 
         ((ActionButtonBase) eventSource).action();
     }
 
     private void getDataInList(final HouseIndex houseIndex) {
-        range(0, 4).forEach(i -> prefectList.get(i).setItems(model.getItems().getCandidateList(houseIndex, i)));
+        prefectBoyList.setItems(model.getItems().getCandidateList(houseIndex, selectedPost));
+        prefectGirlList.setItems(model.getItems().getCandidateList(houseIndex, selectedPost + 1));
     }
 
 
@@ -270,14 +293,19 @@ public class CandidateListController implements Initializable {
     private void deleteMenu() {
         final var list = (ListView<String>) stage.getScene().getFocusOwner();
 
-        model.addUndoTaskDelete(getIndexFromData(list), list.getSelectionModel().getSelectedItems().toArray(new String[0]));
-        deleteSelectedItem(list);
+        final var selectedItems = list.getSelectionModel().getSelectedItems();
+
+        if (!selectedItems.isEmpty()) {
+            model.addUndoTaskDelete((byte) (selectedPost + getIndexFromData(list)), selectedItems.toArray(new String[0]));
+            deleteSelectedItem(list);
+        }
+
     }
 
     @SuppressWarnings("unchecked")
     @FXML
     private void insertMenu() {
-        final var list = (ListView<String>) stage.getScene().getFocusOwner();
+        final var list = (ListView<String>) mainArea.getScene().getFocusOwner();
         addNewItem(list, DEFAULT_NAME);
     }
 
@@ -286,7 +314,7 @@ public class CandidateListController implements Initializable {
 
     @FXML
     private void changeHouseButton(ActionEvent event) {
-        final var houseIndex = ((CustomMenuButton) event.getSource()).getHouseIndex();
+        final var houseIndex = HouseIndex.valueOf(((Button) event.getSource()).getUserData().toString());
         changeHouse(true, houseIndex);
     }
 
@@ -306,7 +334,7 @@ public class CandidateListController implements Initializable {
 
         if (animateChange) {
             if (a == null) {
-                a = new CustomFadeInUp(tabPane);
+                a = new CustomFadeInUp(mainArea);
             }
             //Animate tabPane
             a.stop();
@@ -326,6 +354,36 @@ public class CandidateListController implements Initializable {
 //        sportsPrefectBoyList.
     }
 
+    @FXML
+    private void changePostButton(ActionEvent event) {
+        /*switch ( (String) ((Button)event.getSource()).getUserData() ) {
+            case "0":
+                changePost(HOUSE_PREFECT_INDEX);
+                break;
+            case "1":
+                changePost(SPORTS_PREFECT_INDEX);
+                break;
+        }*/
+        var button = event.getSource();
+        if (button == houseTab) {
+            if (selectedPost != HOUSE_PREFECT_INDEX) {
+                changePost(HOUSE_PREFECT_INDEX);
+                sportsTab.getStyleClass().remove("active");
+                houseTab.getStyleClass().add("active");
+            }
+        } else {
+            if (selectedPost != SPORTS_PREFECT_INDEX) {
+                changePost(SPORTS_PREFECT_INDEX);
+                houseTab.getStyleClass().remove("active");
+                sportsTab.getStyleClass().add("active");
+            }
+        }
+    }
+
+    private void changePost(final byte post) {
+        selectedPost = post;
+        getDataInList(model.getCurrentHouse());
+    }
 
     //methods related to file IO
     @FXML
@@ -377,19 +435,22 @@ public class CandidateListController implements Initializable {
     }
 
     public void loadFile(File file) {
-        try {
-            model.getDataFromFile(file);
-            getDataInList(model.getCurrentHouse());
+        if (file.length() != 0) {
+            try {
+                model.getDataFromFile(file);
+                getDataInList(model.getCurrentHouse());
+                model.setCurrentFile(file);
+                fileName.setValue("- " + file.getName());
+            } catch (IOException | ClassNotFoundException e) {
+                var alert = new FlatAlert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Could not load file");
+                alert.setContentText("Could not read/access file.\nIt might me corrupt or inaccessible");
+                new JMetro(alert.getDialogPane(), Style.LIGHT);
+                alert.setResizable(true);
+                alert.show();
+            }
+        } else
             model.setCurrentFile(file);
-            fileName.setValue("- " + file.getName());
-        } catch (IOException | ClassNotFoundException e) {
-            var alert = new FlatAlert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Could not load file");
-            alert.setContentText("Could not read/access file.\nIt might me corrupt or inaccessible");
-            new JMetro(alert.getDialogPane(), Style.LIGHT);
-            alert.setResizable(true);
-            alert.show();
-        }
 
     }
 
@@ -413,16 +474,41 @@ public class CandidateListController implements Initializable {
     //Undo and Redo
     @FXML
     private void undo() {
-        var a = model.undoLastTask();
-        highlightListView(a[1]);
-        changeHouse(false, HouseIndex.getFromIndex(a[0]));
+        manageListAndButton(model.undoLastTask());
     }
 
     @FXML
     private void redo() {
-        var a = model.redoLastTask();
-        highlightListView(a[1]);
-        changeHouse(false, HouseIndex.getFromIndex(a[0]));
+        manageListAndButton(model.redoLastTask());
+    }
+
+    private void manageListAndButton(byte[] a) {
+        var houseIndex = model.getCurrentHouse().ordinal();
+
+        if ( (a[1] & 1) == 0) // boy prefect
+            prefectBoyList.requestFocus();
+        else prefectGirlList.requestFocus();
+
+        if ((a[1] & 2)  != selectedPost) { //if post is changed
+            if (a[1] < 2) {
+                selectedPost = HOUSE_PREFECT_INDEX;
+                sportsTab.getStyleClass().remove("active");
+                houseTab.getStyleClass().add("active");
+            } else {
+                selectedPost = SPORTS_PREFECT_INDEX;
+                houseTab.getStyleClass().remove("active");
+                sportsTab.getStyleClass().add("active");
+            }
+
+            if (a[0] == houseIndex) {//house is not changed
+                getDataInList(model.getCurrentHouse());
+                return;
+            }
+        }
+
+
+        if (a[0] != houseIndex) //if house is changed
+            changeHouse(false, HouseIndex.getFromIndex(a[0]));
     }
 
 
@@ -432,14 +518,4 @@ public class CandidateListController implements Initializable {
         return Byte.parseByte(node.getUserData().toString());
     }
 
-    private void highlightListView(int listIndex) {
-        if (listIndex < 0 || listIndex > 3)
-            throw new NumberFormatException("listIndex out of range");
-        if (listIndex < 2) {
-            tabPane.getSelectionModel().clearAndSelect(0);
-        } else {
-            tabPane.getSelectionModel().clearAndSelect(1);
-        }
-        prefectList.get(listIndex).requestFocus();
-    }
 }

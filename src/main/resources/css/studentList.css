@@ -1,10 +1,10 @@
-.tab-pane {
+.main-area {
     -fx-border-width: 0 0 3 0;
     -fx-border-color: #dadbdc;
     -house-color: #7FE35E5E;
 }
 
-.tab-pane .main-area {
+.main-area {
     -fx-background-color: #dadbdc;
 }
 
@@ -12,6 +12,7 @@
     -fx-font-size: 2.3em;
     -fx-font-weight: bold;
 }
+
 
 FlowPane, .main-area .list-view .text-field {
     accent_color: #0078d7;
@@ -22,11 +23,46 @@ FlowPane, .main-area .list-view .text-field {
     -fx-border-color: accent_color;
 }
 
-.button:default:focused {
-    -fx-border-color: border_hover_default_color;
+.list-view .context-menu {
+    -fx-font-size: .5em;
 }
 
-.button:focused {
+.button:default:focused {
+    -fx-border-color: border_hover_default_color;
+
+}
+
+.main-area .button:focused, .flow-pane .button:focused {
     -fx-border-color: border_hover_color;
-    -fx-border-width: 2, 0, 0 !important;
+    -fx-border-style: solid;
+    -fx-border-width: 1;
+}
+
+.button-bar .button {
+    -fx-background-color: inherit;
+    -fx-text-fill: #999;
+    -shrink-animate-on-press: false;
+}
+
+.button-bar .button:hover {
+    -fx-text-fill: #555;
+}
+
+.button-bar .button.active {
+    -fx-text-fill: #111;
+}
+
+.button-bar .button:focused {
+    -fx-border-width: 1;
+    -fx-border-color: #4d4d4d;
+    -fx-border-style: solid;
+}
+
+.button-bar .button.active {
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: accent_color;
+}
+
+.button-bar .button.active:focused {
+    -fx-border-width: 0 0 2 0, 0, 0;
 }

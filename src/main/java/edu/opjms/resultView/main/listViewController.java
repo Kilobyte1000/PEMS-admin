@@ -1,17 +1,15 @@
 package edu.opjms.resultView.main;
 
-import com.jfoenix.controls.JFXMasonryPane;
+//import com.jfoenix.controls.JFXMasonryPane;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import jfxtras.styles.jmetro.JMetro;
-import jfxtras.styles.jmetro.JMetroStyleClass;
 import jfxtras.styles.jmetro.Style;
 
 import java.net.URL;

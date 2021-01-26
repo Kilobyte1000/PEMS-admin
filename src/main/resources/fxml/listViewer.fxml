@@ -1,38 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import edu.opjms.candidateSelector.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-
-<BorderPane fx:id="root" prefHeight="673.0" prefWidth="863.0" maxHeight="Infinity" stylesheets="@../css/studentList.css" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.opjms.candidateSelector.main.CandidateListController">
+<?import edu.opjms.candidateSelector.controls.ActionButtonNew?>
+<?import edu.opjms.candidateSelector.controls.ActionButtonEdit?>
+<?import edu.opjms.candidateSelector.controls.ActionButtonDelete?>
+<?import edu.opjms.candidateSelector.controls.ActionButtonDeleteAll?>
+<BorderPane fx:id="root" maxHeight="Infinity" prefHeight="673.0" prefWidth="863.0" stylesheets="@../css/studentList.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.opjms.candidateSelector.main.CandidateListController">
     <top>
-        <MenuBar>
+        <MenuBar useSystemMenuBar="true">
             <effect>
                 <DropShadow blurType="TWO_PASS_BOX" height="18.0" radius="4.0" width="0.0" />
             </effect>
-            <Menu text="_File">
-                <MenuItem accelerator="Shortcut+N" mnemonicParsing="false" text="New" onAction="#newFile"/>
+            <Menu text="File">
+                <MenuItem accelerator="Shortcut+N" mnemonicParsing="false" onAction="#newFile" text="New" />
                 <MenuItem accelerator="Shortcut+O" mnemonicParsing="false" onAction="#openFile" text="Open…" />
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem accelerator="Shortcut+S" mnemonicParsing="false" onAction="#saveFile" text="Save" />
                 <MenuItem accelerator="Shortcut+Shift+S" mnemonicParsing="false" onAction="#saveAs" text="Save As…" />
                 <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" text="Exit" onAction="#close"/>
+                <MenuItem mnemonicParsing="false" onAction="#close" text="Exit" />
             </Menu>
-            <Menu text="_Edit">
+            <Menu text="Edit">
                 <MenuItem fx:id="undoMenu" accelerator="Shortcut+Z" mnemonicParsing="false" onAction="#undo" text="Undo " />
                 <MenuItem fx:id="redoMenu" accelerator="Shortcut+Y" mnemonicParsing="false" onAction="#redo" text="Redo " />
                 <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem fx:id="insertMenu" accelerator="INSERT" text="Add New Candidate" onAction="#insertMenu"/>
-                <MenuItem fx:id="deleteMenu" accelerator="DELETE" text="Remove Selected Candidates" onAction="#deleteMenu"/>
+                <MenuItem fx:id="insertMenu" accelerator="INSERT" onAction="#insertMenu" text="Add New Candidate" />
+                <MenuItem fx:id="deleteMenu" accelerator="DELETE" onAction="#deleteMenu" text="Remove Selected Candidates" />
 
             </Menu>
-            <Menu text="_Window">
+            <Menu text="Window">
                 <MenuItem accelerator="Shortcut+1" mnemonicParsing="false" onAction="#changeHouseMenu" text="Tilak Candidate Window" userData="TILAK" />
                 <MenuItem accelerator="Shortcut+2" mnemonicParsing="false" onAction="#changeHouseMenu" text="Kabir Candidate Window" userData="KABIR" />
                 <MenuItem accelerator="Shortcut+3" mnemonicParsing="false" onAction="#changeHouseMenu" text="Raman Candidate Window" userData="RAMAN" />
@@ -43,7 +59,7 @@
         </MenuBar>
     </top>
     <left>
-        <VBox prefHeight="374.0" prefWidth="230.0" stylesheets="@../css/sideNav.css" styleClass="nav">
+        <VBox prefHeight="374.0" prefWidth="230.0" styleClass="nav" stylesheets="@../css/sideNav.css">
             <Label graphicTextGap="11.0" maxHeight="Infinity" maxWidth="Infinity" text="Select House" HBox.hgrow="ALWAYS">
                 <VBox.margin>
                     <Insets bottom="15.8" left="9.5" top="43.5" />
@@ -55,76 +71,58 @@
                     <SVGPath content="M 4 7 L 4 9 L 28 9 L 28 7 Z M 4 15 L 4 17 L 28 17 L 28 15 Z M 4 23 L 4 25 L 28 25 L 28 23 Z" fillRule="EVEN_ODD" pickOnBounds="true" />
                 </graphic>
             </Label>
-            <CustomMenuButton fx:id="buttonTilak" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Tilak" textAlignment="RIGHT" />
-            <CustomMenuButton fx:id="buttonKabir" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Kabir" textAlignment="RIGHT" />
-            <CustomMenuButton fx:id="buttonRaman" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Raman" textAlignment="RIGHT" />
-            <CustomMenuButton fx:id="buttonTagore" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Tagore" textAlignment="RIGHT" />
-            <CustomMenuButton fx:id="buttonVashishth" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Vashishth" textAlignment="RIGHT" />
-            <CustomMenuButton fx:id="buttonVivekanand" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Vivekanand" textAlignment="RIGHT" />
+            <Button fx:id="buttonTilak" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Tilak" textAlignment="RIGHT" userData="TILAK" />
+            <Button fx:id="buttonKabir" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Kabir" textAlignment="RIGHT" userData="KABIR" />
+            <Button fx:id="buttonRaman" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Raman" textAlignment="RIGHT" userData="RAMAN" />
+            <Button fx:id="buttonTagore" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Tagore" textAlignment="RIGHT" userData="TAGORE" />
+            <Button fx:id="buttonVashishth" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Vashishth" textAlignment="RIGHT" userData="VASHISHTH" />
+            <Button fx:id="buttonVivekanand" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#changeHouseButton" prefHeight="50.0" text="Vivekanand" textAlignment="RIGHT" userData="VIVEKANAND" />
         </VBox>
     </left>
     <center>
         <VBox>
-            <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS" styleClass="underlined" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-                <Tab text="House Prefect">
-                    <GridPane hgap="2.0" styleClass="main-area">
-                        <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-                        </columnConstraints>
-                        <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        </rowConstraints>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" prefHeight="50.0" prefWidth="111.0" text="Boys" textOverrun="CLIP" AnchorPane.leftAnchor="131.0" AnchorPane.rightAnchor="132.2" />
+            <HBox styleClass="button-bar" spacing="10.0">
+                <children>
+                    <Button styleClass="active" fx:id="houseTab" onAction="#changePostButton" mnemonicParsing="false" text="House Prefect" />
+                    <Button fx:id="sportsTab" onAction="#changePostButton" mnemonicParsing="false" text="Sports Prefect" />
+                </children>
+                <padding>
+                    <Insets left="6.0" top="8.0" />
+                </padding>
+            </HBox>
+            <GridPane fx:id="mainArea" hgap="2.0" styleClass="main-area" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                </rowConstraints>
+                <children>
+                    <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                        <children>
+                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" text="Boys" textOverrun="CLIP" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
                             <Separator layoutX="87.0" layoutY="78.0" prefWidth="200.0" AnchorPane.leftAnchor="87.0" AnchorPane.rightAnchor="87.39999999999998" />
-                            <ListView fx:id="housePrefectBoyList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="0" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
+                            <ListView fx:id="prefectBoyList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="0" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
                             <ActionButtonNew layoutX="20.0" layoutY="445.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Add" AnchorPane.bottomAnchor="68.60000000000002" AnchorPane.leftAnchor="20.0" />
                             <ActionButtonEdit layoutX="20.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Edit" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.leftAnchor="20.0" />
                             <ActionButtonDelete layoutX="261.0" layoutY="446.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove" AnchorPane.bottomAnchor="67.60000000000002" AnchorPane.rightAnchor="15.0" />
                             <ActionButtonDeleteAll layoutX="261.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove All" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.rightAnchor="14.999999999999972" />
-                        </AnchorPane>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" prefHeight="50.0" prefWidth="111.0" text="Girls" textOverrun="CLIP" AnchorPane.leftAnchor="131.0" AnchorPane.rightAnchor="132.2" />
+                        </children>
+                    </AnchorPane>
+                    <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                        <children>
+                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" text="Girls" textOverrun="CLIP" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
                             <Separator layoutX="87.0" layoutY="78.0" prefWidth="200.0" AnchorPane.leftAnchor="87.0" AnchorPane.rightAnchor="87.39999999999998" />
-                            <ListView fx:id="housePrefectGirlList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="1" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
+                            <ListView fx:id="prefectGirlList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="1" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
                             <ActionButtonNew layoutX="20.0" layoutY="445.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Add" AnchorPane.bottomAnchor="68.60000000000002" AnchorPane.leftAnchor="20.0" />
                             <ActionButtonEdit layoutX="20.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Edit" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.leftAnchor="20.0" />
                             <ActionButtonDelete layoutX="261.0" layoutY="446.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove" AnchorPane.bottomAnchor="67.60000000000002" AnchorPane.rightAnchor="15.0" />
                             <ActionButtonDeleteAll layoutX="261.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove All" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.rightAnchor="14.999999999999972" />
-                        </AnchorPane>
-                    </GridPane>
-                </Tab>
-                <Tab text="Sports Prefect">
-                    <GridPane hgap="2.0" styleClass="main-area">
-                        <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
-                        </columnConstraints>
-                        <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        </rowConstraints>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" prefHeight="50.0" prefWidth="111.0" text="Boys" textOverrun="CLIP" AnchorPane.leftAnchor="131.0" AnchorPane.rightAnchor="132.2" />
-                            <Separator layoutX="87.0" layoutY="78.0" prefWidth="200.0" AnchorPane.leftAnchor="87.0" AnchorPane.rightAnchor="87.39999999999998" />
-                            <ListView fx:id="sportsPrefectBoyList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="2" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
-                            <ActionButtonNew layoutX="20.0" layoutY="445.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Add" AnchorPane.bottomAnchor="68.60000000000002" AnchorPane.leftAnchor="20.0" />
-                            <ActionButtonEdit layoutX="20.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Edit" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.leftAnchor="20.0" />
-                            <ActionButtonDelete layoutX="261.0" layoutY="446.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove" AnchorPane.bottomAnchor="67.60000000000002" AnchorPane.rightAnchor="15.0" />
-                            <ActionButtonDeleteAll layoutX="261.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove All" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.rightAnchor="14.999999999999972" />
-                        </AnchorPane>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="background" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                            <Label alignment="CENTER" layoutX="131.0" layoutY="14.0" prefHeight="50.0" prefWidth="111.0" text="Girls" textOverrun="CLIP" AnchorPane.leftAnchor="131.0" AnchorPane.rightAnchor="132.2" />
-                            <Separator layoutX="87.0" layoutY="78.0" prefWidth="200.0" AnchorPane.leftAnchor="87.0" AnchorPane.rightAnchor="87.39999999999998" />
-                            <ListView fx:id="sportsPrefectGirlList" layoutX="20.0" layoutY="96.0" prefHeight="294.0" prefWidth="214.0" style="-fx-font-size: 1.3em;" userData="3" AnchorPane.bottomAnchor="164.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="96.0" />
-                            <ActionButtonNew layoutX="20.0" layoutY="445.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Add" AnchorPane.bottomAnchor="68.60000000000002" AnchorPane.leftAnchor="20.0" />
-                            <ActionButtonEdit layoutX="20.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Edit" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.leftAnchor="20.0" />
-                            <ActionButtonDelete layoutX="261.0" layoutY="446.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove" AnchorPane.bottomAnchor="67.60000000000002" AnchorPane.rightAnchor="15.0" />
-                            <ActionButtonDeleteAll layoutX="261.0" layoutY="500.0" mnemonicParsing="false" onAction="#buttonAction" prefHeight="40.0" prefWidth="98.0" text="Remove All" AnchorPane.bottomAnchor="13.600000000000023" AnchorPane.rightAnchor="14.999999999999972" />
-                        </AnchorPane>
-                    </GridPane>
-                </Tab>
-            </TabPane>
+                        </children>
+                    </AnchorPane>
+                </children>
+            </GridPane>
             <FlowPane alignment="CENTER_RIGHT" hgap="25" prefHeight="90.0" prefWidth="422.0" styleClass="background" BorderPane.alignment="CENTER">
                 <padding>
                     <Insets right="20" />

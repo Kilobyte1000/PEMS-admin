@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Button?>
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.opjms.main.TitleCtrl">
+   <StackPane fx:id="topBar" prefHeight="202.0" prefWidth="798.0" style="-fx-background-color: #4c9b6e;">
+      <Label fx:id="a" ellipsisString="" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 3em;"
+             text="OPJMS Election Management System" textFill="WHITE">
+         <font>
+            <Font size="37.0"/>
+         </font>
+      </Label>
+   </StackPane>
+   <StackPane prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+      <Button onAction="#populate"
+              style="-fx-background-color: #2e8066; -fx-padding: .5em 1em;" text="Manage Candidates"
+              textFill="WHITE">
+         <font>
+            <Font size="20.0"/>
+         </font>
+      </Button>
+   </StackPane>
+</VBox>

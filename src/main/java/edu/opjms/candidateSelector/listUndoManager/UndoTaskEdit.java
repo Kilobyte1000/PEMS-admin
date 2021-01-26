@@ -7,22 +7,20 @@ public class UndoTaskEdit<T> extends UndoTasks<T> {
     private final T oldItem;
     private final T newItem;
 
-    public UndoTaskEdit(ObservableList<T> listItems, HouseIndex houseIndex, byte prefectPost, T oldItem, T newItem) {
-        super(listItems, houseIndex, prefectPost);
+    public UndoTaskEdit(HouseIndex houseIndex, byte prefectPost, T oldItem, T newItem) {
+        super(houseIndex, prefectPost);
         this.oldItem = oldItem;
         this.newItem = newItem;
     }
 
     @Override
-    public int[] undo() {
-        this.listItems.set(listItems.indexOf(newItem), oldItem);
-        return this.returnUniquePost();
+    public void undo(ObservableList<T> listItems) {
+        listItems.set(listItems.indexOf(newItem), oldItem);
     }
 
     @Override
-    public int[] redo() {
-        this.listItems.set(listItems.indexOf(oldItem), newItem);
-        return returnUniquePost();
+    public void redo(ObservableList<T> listItems) {
+        listItems.set(listItems.indexOf(oldItem), newItem);
     }
 
     @Override
@@ -30,7 +28,6 @@ public class UndoTaskEdit<T> extends UndoTasks<T> {
         return "UndoTaskEdit{" +
                 "oldItem=" + oldItem +
                 ", newItem=" + newItem +
-                ", listItems=" + listItems +
                 '}';
     }
 }

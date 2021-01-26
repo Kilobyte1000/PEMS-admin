@@ -97,38 +97,40 @@ class Model {
         return isDataSaved;
     }
 
-    private void addToUndoDeck(UndoTasks<String> undoTask) {
+    private void addToUndoDeck(UndoTasks<String> undoTask, boolean clearRedo) {
         if (undoDeque.size() >= 32)
             undoDeque.removeLast();
         undoDeque.push(undoTask);
         undoNotAvailable.setValue(false);
 
         isDataSaved.setValue(false);
+
+        if (!redoNotAvailable.getValue() && clearRedo) {
+            redoDeque.clear();
+            redoNotAvailable.setValue(true);
+        }
     }
 
     public void addUndoTaskAdd(byte prefectPost, String item) {
-        addToUndoDeck(new UndoTaskAdd<>(items.getCandidateList(getCurrentHouse(), prefectPost),
-                getCurrentHouse(),
+        addToUndoDeck(new UndoTaskAdd<>(getCurrentHouse(),
                 prefectPost,
-                item));
+                item), true);
     }
 
     public void addUndoTaskDelete(byte prefectPost, String[] items) {
-        addToUndoDeck(new UndoTaskDelete<>(this.items.getCandidateList(getCurrentHouse(), prefectPost),
-                getCurrentHouse(),
+        addToUndoDeck(new UndoTaskDelete<>(getCurrentHouse(),
                 prefectPost,
-                items));
+                items), true);
     }
 
     public void addUndoTaskEdit(byte prefectPost, String oldItem, String newItem) {
-        addToUndoDeck(new UndoTaskEdit<>(this.items.getCandidateList(getCurrentHouse(), prefectPost),
-                getCurrentHouse(),
+        addToUndoDeck(new UndoTaskEdit<>(getCurrentHouse(),
                 prefectPost,
                 oldItem,
-                newItem));
+                newItem), true);
     }
 
-    public int[] undoLastTask() {
+    public byte[] undoLastTask() {
         var undoAbleTask = undoDeque.pop();
         undoNotAvailable.setValue(undoDeque.isEmpty());
 
@@ -137,16 +139,26 @@ class Model {
         redoDeque.push(undoAbleTask);
         redoNotAvailable.setValue(false);
 
-        return undoAbleTask.undo();
+        var undoHouse = undoAbleTask.getHouseIndex();
+        var undoPost = undoAbleTask.getPrefectPost();
+
+        undoAbleTask.undo(items.getCandidateList(undoHouse, undoPost));
+
+        return new byte[] {(byte)undoHouse.ordinal(), undoPost};
     }
 
-    public int[] redoLastTask() {
+    public byte[] redoLastTask() {
         var redoAbleTask = redoDeque.pop();
         redoNotAvailable.setValue(redoDeque.isEmpty());
 
-        addToUndoDeck(redoAbleTask);
+        addToUndoDeck(redoAbleTask ,false);
 
-        return redoAbleTask.redo();
+        var redoHouse = redoAbleTask.getHouseIndex();
+        var redoPost = redoAbleTask.getPrefectPost();
+
+        redoAbleTask.redo(items.getCandidateList(redoHouse, redoPost));
+
+        return new byte[] {(byte)redoHouse.ordinal(), redoPost};
     }
 
 

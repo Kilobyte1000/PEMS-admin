@@ -27,13 +27,7 @@ class ListData implements Externalizable {
         }
     }
 
-    private void validatePost(int post) throws NumberFormatException {
-        if (post < 0 || post > 3)
-            throw new NumberFormatException("post id should be either 0/1/2/3, found: " + post);
-    }
-
     public ObservableList<String> getCandidateList(HouseIndex houseIndex, int post) {
-        validatePost(post);
         return candidateList[houseIndex.ordinal()][post];
     }
 

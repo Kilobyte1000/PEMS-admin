@@ -21,6 +21,11 @@ public class CustomFadeInUp extends AnimationFX {
     }
 
     void initTimeline() {
-        this.setTimeline(new Timeline(new KeyFrame(Duration.millis(0.0D), new KeyValue(this.getNode().opacityProperty(), 0, AnimateFXInterpolator.EASE), new KeyValue(this.getNode().translateYProperty(), this.getNode().getBoundsInParent().getHeight() / 10, AnimateFXInterpolator.EASE)), new KeyFrame(Duration.millis(750.0D), new KeyValue(this.getNode().opacityProperty(), 1, AnimateFXInterpolator.EASE), new KeyValue(this.getNode().translateYProperty(), 0, AnimateFXInterpolator.EASE))));
+        this.setTimeline(new Timeline(new KeyFrame(Duration.millis(0.0D),
+                    new KeyValue(this.getNode().opacityProperty(), 0, AnimateFXInterpolator.EASE),
+                    new KeyValue(this.getNode().translateYProperty(), this.getNode().getBoundsInParent().getHeight() / 10, AnimateFXInterpolator.EASE)),
+                new KeyFrame(Duration.millis(750.0D),
+                    new KeyValue(this.getNode().opacityProperty(), 1, AnimateFXInterpolator.EASE),
+                    new KeyValue(this.getNode().translateYProperty(), 0, AnimateFXInterpolator.EASE))));
     }
 }
