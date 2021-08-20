@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
@@ -13,6 +14,7 @@ import javafx.util.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Animates an object when its position is changed. For instance, when
@@ -22,7 +24,7 @@ import java.util.Map;
  */
 public class ReorderAnimator implements ChangeListener<Number>, ListChangeListener<Node> {
 
-    private final Map<Node, MoveYTransition> nodeYTransitions = new HashMap<>();
+    private final Map<Node, MoveYTransition> nodeYTransitions = new WeakHashMap<>();
     private boolean animateNextChange = false;
 
     /**
@@ -65,6 +67,7 @@ public class ReorderAnimator implements ChangeListener<Number>, ListChangeListen
             final DoubleProperty doubleProperty = (DoubleProperty) ov;
             final Node node = (Node) doubleProperty.getBean();
 
+            node.setCacheHint(CacheHint.SPEED);
 
             MoveYTransition ty = nodeYTransitions.get(node);
             if (ty == null) {
@@ -73,7 +76,10 @@ public class ReorderAnimator implements ChangeListener<Number>, ListChangeListen
             }
             ty.setFromY(ty.getTranslateY() - delta);
 
-            ty.setOnFinished(event -> animateNextChange = false);
+            ty.setOnFinished(event -> {
+                animateNextChange = false;
+                node.setCacheHint(CacheHint.QUALITY);
+            });
             ty.playFromStart();
 
         }

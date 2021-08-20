@@ -1,0 +1,81 @@
+.root-box {
+    -fx-background-color: #212121;
+}
+
+.label, .button, .menu-button-base, .titled-pane > .title > .text {
+    text_color: #e6e6e6
+}
+
+.titled-pane > .content > * {
+    -fx-background-color: border_color, #262626;
+}
+
+.titled-pane {
+    title_background_color: #333333;
+    /*title_background_color: #3d2b2b;*/
+    border_color: #404040;
+    /*border_color: #574040;*/
+}
+
+.titled-pane:focused {
+    border_color: #545454;
+    /*border_color: #634e4e;*/
+    title_background_color: #454545;
+    /*title_background_color: #4f3939;*/
+}
+
+
+.titled-pane > .content {
+    -fx-background-color: border_color, #141414;
+}
+
+.text-input {
+    text_color: #e6e6e6;
+    text_input_background_color: #242424;
+    background_hover_color: #1f1f1f;
+    background_focused_color: #2b2b2b;
+    text_focused_color: text_color;
+}
+
+.combo-box-base {
+    combo_box_background_color: #242424;
+}
+
+/* error */
+.text-input:error {
+    -fx-background-color: #f55858, #242424;
+}
+
+.label.err {
+    /*-fx-text-fill: #f55858;*/
+    -fx-text-fill: #fc6868;
+}
+
+.combo-box:error {
+    -fx-background-color: transparent, #f55858, transparent, #242424;
+}
+
+/* delete button */
+.inner-title Button:hover {
+    -fx-background-color: #863a3a, #f55858;
+    -fx-background-insets: 0, 2;
+}
+
+.inner-title SVGPath {
+    -fx-fill: #f55858;
+}
+
+.inner-title Button:hover SVGPath {
+    -fx-fill: #404040;
+}
+
+.shortcut {
+    -fx-fill: #b3b3b3;
+}
+
+.tooltip {
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 15, 0.16, 0, 4);*/
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 10, 0.12, -1, 2);
+    -fx-background-color: derive(background_color, 10%);
+    -fx-text-fill: #e6e6e6;
+}

@@ -1,6 +1,17 @@
+.root-box {
+    -fx-padding: 5 10;
+}
+
+
 .titled-pane > .content {
     -fx-border-width: 0, 0, 0 !important;
-    /*-fx-background-color: none !important;*/
+    -fx-padding: 0;
+    -fx-background-insets: 0, 0 2 0 2;
+}
+
+.titled-pane > .content > * {
+    -fx-background-insets: 0, 0 2 2 2;
+    -fx-padding: 11.6 9.6 11.6 9.6;
 }
 
 .titled-pane > .title > .inner-title .text {
@@ -11,44 +22,24 @@
     -fx-font-size: 1.6em;
 }
 
+
+/* delete button */
+
 .inner-title Button {
     -fx-padding: 6;
 }
 
-.inner-title Button:hover {
-    -fx-background-color: #400606, #b83030;
-    -fx-background-insets: 0, 2;
+.shortcut {
+    -fx-font-size: .95em;
 }
 
-.inner-title SVGPath {
-    -fx-fill: #ca403f;
-}
-
-.inner-title Button:hover SVGPath {
-    -fx-fill: #d6d6d6;
-}
 
 .label, .titled-pane .button {
     -fx-font-size: 1.3em !important;
 }
 
-.text-field, .text-area, .combo-box {
-    -fx-font-size: 1.2em !important;
-    -fx-background-radius: 3, 2;
-}
 
 
-/*noinspection SpellCheckingInspection*/
-.tooltip {
-    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 15, 0.16, 0, 4);*/
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 10, 0.12, -1, 2);
-    -fx-background-color: derive(background_color, -5%);
-}
-
-.combo-box {
-    -fx-font-size: 1.1em !important;
-    -fx-background-radius: 0, 3, 2 !important;
-}
 
 .combo-box:disabled {
     -fx-opacity: 0.9 !important;
@@ -67,23 +58,66 @@
     -fx-padding: 0;
 }
 
-.menu-button {
+/* shadow button test */
+.menu-button, .button {
     -fx-border-radius: 4 !important;
     -fx-background-radius: 4 !important;
+    /*-fx-effect: dropshadow(one-pass-box, rgba(0,0,0,.5), 3, .1, 0, 1);*/
+    /*-fx-effect: dropshadow(two-pass-box, rgba(0,0,0,.45), 1.3, .2, 0, 1);*/
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,.45), 2.5, .1, 0, 1);
+}
+
+.menu-button:hover, .button:hover {
+    -fx-border-color: #ccc, #6b6b6b;
+    /*-fx-border-color: #333333, #858585;*/
+    -fx-border-width: 2, 1;
+}
+
+.menu-button:hover:focused, .button:hover:focused {
+    -fx-border-width: 1, 1;
+    -fx-border-style: solid, solid;
+}
+
+.menu-button:pressed, .button:pressed {
+    /*-fx-border-width: 2, 0;*/
+    -fx-border-color: #999999, #999;
+}
+/* shadow button end */
+
+/* round inputs */
+
+.text-field, .text-area, .combo-box {
+    -fx-font-size: 1.2em !important;
+    -fx-background-radius: 3, 2;
+}
+
+.combo-box {
+    -fx-font-size: 1.1em !important;
+    -fx-background-radius: 0, 3, 2 !important;
 }
 
 .text-field .right-button {
     -fx-background-insets: -0.1em -0.4em -0.1em -0.4em;
 }
 
-
 /* snack bar */
-.jfx-snackbar-layout {
-    -fx-background-color: #222;
+.snackbar {
+    -fx-background-color: #353535;
+    -fx-background-radius: 5;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,.45), 4, .1, 0, 1);
 }
 
-.jfx-snackbar-toast {
-    -fx-text-fill: white;
+.snackbar > .label {
+    -fx-text-fill: #e6e6e6;
+    -fx-font-size: 1.4em !important;
+}
+
+.snackbar > .button {
+    -fx-background-color: transparent;
+    -fx-effect: none;
+    -fx-text-fill: #56dc7a;
+    -fx-font-size: 1.4em;
 }
 
 .titled-pane:focused > .title > .arrow-button > .arrow {

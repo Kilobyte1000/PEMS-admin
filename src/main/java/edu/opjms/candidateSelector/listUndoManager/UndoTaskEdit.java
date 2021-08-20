@@ -1,13 +1,13 @@
 package edu.opjms.candidateSelector.listUndoManager;
 
-import edu.opjms.candidateSelector.util.HouseIndex;
+import net.kilobyte1000.Houses;
 import javafx.collections.ObservableList;
 
 public class UndoTaskEdit<T> extends UndoTasks<T> {
     private final T oldItem;
     private final T newItem;
 
-    public UndoTaskEdit(HouseIndex houseIndex, byte prefectPost, T oldItem, T newItem) {
+    public UndoTaskEdit(Houses houseIndex, byte prefectPost, T oldItem, T newItem) {
         super(houseIndex, prefectPost);
         this.oldItem = oldItem;
         this.newItem = newItem;

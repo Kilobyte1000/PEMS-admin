@@ -1,0 +1,41 @@
+button.err {
+    padding: .4em 1em;
+    border-radius: 0.3em;
+    margin: 0 0 0 1em;
+    background: #d2544a;
+    color: wheat;
+    font-size: 0.6em;
+    border: none;
+}
+
+.container {
+    position: relative;
+}
+
+.container .label {
+    display: flex;
+}
+
+label {
+    margin: 0 0.15em;
+}
+
+label.err {
+    color: #c23131;
+}
+
+div.errBox {
+    display: none;
+    position: absolute;
+    top: 110%;
+    padding: .2em .4em .2em .4em;
+    left: 12%;
+    z-index: 1;
+    transition: opacity 200ms ease-in;
+    box-shadow: 0 3px 6px rgb(0 0 0 / 25%);
+    border: #922a2a 1px solid;
+    border-radius: .2em;
+    color: #4a4a4a;
+    background: #f5e3e3;
+    font-size: .9em;
+}

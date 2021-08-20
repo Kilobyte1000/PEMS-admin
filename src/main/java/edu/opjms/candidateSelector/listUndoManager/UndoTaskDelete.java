@@ -1,6 +1,6 @@
 package edu.opjms.candidateSelector.listUndoManager;
 
-import edu.opjms.candidateSelector.util.HouseIndex;
+import net.kilobyte1000.Houses;
 import javafx.collections.ObservableList;
 
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class UndoTaskDelete<T> extends UndoTasks<T> {
     T[] deletedItems;
 
-    public UndoTaskDelete(HouseIndex houseIndex, byte prefectPost, T[] deletedItems) {
+    public UndoTaskDelete(Houses houseIndex, byte prefectPost, T[] deletedItems) {
         super(houseIndex, prefectPost);
         this.deletedItems = deletedItems;
     }

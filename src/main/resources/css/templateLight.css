@@ -1,0 +1,59 @@
+
+.titled-pane > .content > * {
+    -fx-background-color: border_color, #fafafa;
+}
+
+.titled-pane {
+    title_background_color: #ededed;
+    /*title_background_color: #f3b9b9;*/
+    border_color: #cccccc;
+    /*border_color: #f3b9b9;*/
+
+}
+
+.titled-pane:focused {
+    border_color: #a6a6a6;
+    title_background_color: #d6d6d6;
+}
+
+.titled-pane > .content {
+    -fx-background-color: border_color, #fafafa;
+}
+
+/* ds delete button */
+
+.inner-title Button:hover {
+    -fx-background-color: #400606, #b83030;
+    -fx-background-insets: 0, 2;
+}
+
+.inner-title SVGPath {
+    -fx-fill: #ca403f;
+}
+
+.inner-title Button:hover SVGPath {
+    -fx-fill: #d6d6d6;
+}
+
+.tooltip {
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 15, 0.16, 0, 4);*/
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 10, 0.12, -1, 2);
+    -fx-background-color: derive(background_color, -5%);
+}
+
+.shortcut {
+    -fx-fill: #4d4d4d;
+}
+
+/* errors */
+.text-field:error {
+    -fx-background-color: red, white;
+}
+
+.label.err {
+    -fx-text-fill: red;
+}
+
+.combo-box:error {
+    -fx-background-color: transparent, red, transparent, white;
+}

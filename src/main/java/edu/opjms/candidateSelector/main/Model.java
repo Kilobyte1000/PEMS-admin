@@ -4,7 +4,7 @@ import edu.opjms.candidateSelector.listUndoManager.UndoTaskAdd;
 import edu.opjms.candidateSelector.listUndoManager.UndoTaskDelete;
 import edu.opjms.candidateSelector.listUndoManager.UndoTaskEdit;
 import edu.opjms.candidateSelector.listUndoManager.UndoTasks;
-import edu.opjms.candidateSelector.util.HouseIndex;
+import net.kilobyte1000.Houses;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.*;
@@ -30,7 +30,7 @@ class Model {
     public SimpleBooleanProperty undoNotAvailable = new SimpleBooleanProperty(true);
     public SimpleBooleanProperty redoNotAvailable = new SimpleBooleanProperty(true);
     /* Required Data */
-    private HouseIndex currentHouse;
+    private Houses currentHouse;
     private File currentFile;
     /* Observable List To Store Prefect List Data */
     private ListData items;
@@ -42,11 +42,11 @@ class Model {
         redoDeque = new ArrayDeque<>();
     }
 
-    public HouseIndex getCurrentHouse() {
+    public Houses getCurrentHouse() {
         return currentHouse;
     }
 
-    public void setCurrentHouse(HouseIndex currentHouse) {
+    public void setCurrentHouse(Houses currentHouse) {
         this.currentHouse = currentHouse;
     }
 

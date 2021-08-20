@@ -1,13 +1,13 @@
 package edu.opjms.candidateSelector.listUndoManager;
 
-import edu.opjms.candidateSelector.util.HouseIndex;
+import net.kilobyte1000.Houses;
 import javafx.collections.ObservableList;
 
 abstract public class UndoTasks<T> {
-    private final HouseIndex houseIndex;
+    private final Houses houseIndex;
     private final byte prefectPost;
 
-    public UndoTasks(HouseIndex houseIndex, byte prefectPost) {
+    public UndoTasks(Houses houseIndex, byte prefectPost) {
         if (prefectPost > 3 || prefectPost < 0)
             throw new NumberFormatException("post id should be either 0/1/2/3, found: " + prefectPost);
         this.houseIndex = houseIndex;
@@ -19,7 +19,7 @@ abstract public class UndoTasks<T> {
     }*/
 
 
-    public HouseIndex getHouseIndex() {
+    public Houses getHouseIndex() {
         return houseIndex;
     }
 

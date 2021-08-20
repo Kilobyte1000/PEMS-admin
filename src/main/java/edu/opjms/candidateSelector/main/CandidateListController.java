@@ -4,7 +4,10 @@ import edu.opjms.candidateSelector.animations.CustomFadeInUp;
 import edu.opjms.candidateSelector.controls.ActionButtonBase;
 import edu.opjms.candidateSelector.controls.ActionButtonDelete;
 import edu.opjms.candidateSelector.controls.ActionButtonDeleteAll;
-import edu.opjms.candidateSelector.util.HouseIndex;
+import javafx.animation.*;
+import javafx.scene.control.skin.ListViewSkin;
+import javafx.util.Duration;
+import net.kilobyte1000.Houses;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -80,6 +83,9 @@ final public class CandidateListController implements Initializable {
     private List<Button> menuButtons;
     private FlatAlert saveConfirmDialog;
 
+    private AnimatedListViewSkin boyListSkin;
+    private AnimatedListViewSkin<String> girlListSkin;
+
     private final byte HOUSE_PREFECT_INDEX = 0;
     private final byte SPORTS_PREFECT_INDEX = 2;
 
@@ -93,6 +99,12 @@ final public class CandidateListController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         //Initialise prefectList
+        boyListSkin = new AnimatedListViewSkin<>(prefectBoyList);
+        girlListSkin = new AnimatedListViewSkin<>(prefectGirlList);
+
+        prefectBoyList.setSkin(boyListSkin);
+        prefectGirlList.setSkin(girlListSkin);
+
         List<ListView<String>> prefectList = List.of(prefectBoyList, prefectGirlList);
 
         //Set Details Of all the ListViews
@@ -138,7 +150,7 @@ final public class CandidateListController implements Initializable {
         menuButtons = List.of(buttonTilak, buttonKabir, buttonRaman, buttonTagore, buttonVashishth, buttonVivekanand);
 
         //Set Current Editing House as Tilak
-        model.setCurrentHouse(HouseIndex.TILAK);
+        model.setCurrentHouse(Houses.TILAK);
         selectedButton = buttonTilak;
 
         //bind the listView with ObservableLists in model
@@ -281,7 +293,7 @@ final public class CandidateListController implements Initializable {
         ((ActionButtonBase) eventSource).action();
     }
 
-    private void getDataInList(final HouseIndex houseIndex) {
+    private void getDataInList(final Houses houseIndex) {
         prefectBoyList.setItems(model.getItems().getCandidateList(houseIndex, selectedPost));
         prefectGirlList.setItems(model.getItems().getCandidateList(houseIndex, selectedPost + 1));
     }
@@ -314,17 +326,17 @@ final public class CandidateListController implements Initializable {
 
     @FXML
     private void changeHouseButton(ActionEvent event) {
-        final var houseIndex = HouseIndex.valueOf(((Button) event.getSource()).getUserData().toString());
+        final var houseIndex = Houses.valueOf(((Button) event.getSource()).getUserData().toString());
         changeHouse(true, houseIndex);
     }
 
     @FXML
     private void changeHouseMenu(ActionEvent event) {
         changeHouse(false,
-                HouseIndex.valueOf(((MenuItem) event.getSource()).getUserData().toString()));
+                Houses.valueOf(((MenuItem) event.getSource()).getUserData().toString()));
     }
 
-    private void changeHouse(final boolean animateChange, final HouseIndex houseIndex) {
+    private void changeHouse(final boolean animateChange, final Houses houseIndex) {
         model.setCurrentHouse(houseIndex);
 
         Button button = menuButtons.get(houseIndex.ordinal());
@@ -333,12 +345,8 @@ final public class CandidateListController implements Initializable {
         getDataInList(houseIndex);
 
         if (animateChange) {
-            if (a == null) {
-                a = new CustomFadeInUp(mainArea);
-            }
-            //Animate tabPane
-            a.stop();
-            a.play();
+            boyListSkin.playVerticalAnim();
+            girlListSkin.playVerticalAnim();
         }
 
         //set accent color according to house
@@ -367,12 +375,18 @@ final public class CandidateListController implements Initializable {
         var button = event.getSource();
         if (button == houseTab) {
             if (selectedPost != HOUSE_PREFECT_INDEX) {
+                boyListSkin.playSidewaysAnim(false);
+                girlListSkin.playSidewaysAnim(false);
+
                 changePost(HOUSE_PREFECT_INDEX);
                 sportsTab.getStyleClass().remove("active");
                 houseTab.getStyleClass().add("active");
             }
         } else {
             if (selectedPost != SPORTS_PREFECT_INDEX) {
+                boyListSkin.playSidewaysAnim(true);
+                girlListSkin.playSidewaysAnim(true);
+
                 changePost(SPORTS_PREFECT_INDEX);
                 houseTab.getStyleClass().remove("active");
                 sportsTab.getStyleClass().add("active");
@@ -508,7 +522,7 @@ final public class CandidateListController implements Initializable {
 
 
         if (a[0] != houseIndex) //if house is changed
-            changeHouse(false, HouseIndex.getFromIndex(a[0]));
+            changeHouse(false, Houses.getFromIndex(a[0]));
     }
 
 
@@ -518,4 +532,67 @@ final public class CandidateListController implements Initializable {
         return Byte.parseByte(node.getUserData().toString());
     }
 
+}
+
+class AnimatedListViewSkin<T> extends ListViewSkin<T> {
+
+    private final Timeline sidewaysAnim;
+    private final Animation verticalAnim;
+
+    private final KeyFrame fromLeft;
+    private final KeyFrame fromRight;
+
+
+
+    public AnimatedListViewSkin(ListView<T> control) {
+        super(control);
+        var node = getVirtualFlow();
+
+        final var duration = Duration.millis(500);
+        final var offset = 7;
+        final var fade = 0.0;
+
+//        final var subDuration = duration.divide(3);
+        final var subDuration = Duration.ZERO;
+
+        fromRight = new KeyFrame(subDuration,
+                new KeyValue(node.opacityProperty(), fade, Interpolator.EASE_IN),
+                new KeyValue(node.translateXProperty(), offset, Interpolator.DISCRETE)
+        );
+        fromLeft = new KeyFrame(subDuration,
+                new KeyValue(node.opacityProperty(), fade, Interpolator.EASE_IN),
+                new KeyValue(node.translateXProperty(), -offset, Interpolator.DISCRETE)
+        );
+
+        sidewaysAnim = new Timeline(
+            fromRight,
+            new KeyFrame(duration,
+                new KeyValue(node.opacityProperty(), 1, Interpolator.EASE_OUT),
+                new KeyValue(node.translateXProperty(), 0, Interpolator.EASE_OUT)
+            )
+        );
+
+        verticalAnim = new Timeline(
+                new KeyFrame(subDuration,
+                        new KeyValue(node.opacityProperty(), fade, Interpolator.EASE_IN),
+                        new KeyValue(node.translateYProperty(), 5, Interpolator.DISCRETE)
+                ),
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(node.opacityProperty(), 1, Interpolator.EASE_OUT),
+                        new KeyValue(node.translateYProperty(), 0, Interpolator.EASE_OUT)
+                )
+        );
+    }
+
+    public void playVerticalAnim() {
+        verticalAnim.playFromStart();
+    }
+
+    public void playSidewaysAnim(boolean playFromRight) {
+        if (playFromRight)
+            sidewaysAnim.getKeyFrames().set(0, fromRight);
+        else
+            sidewaysAnim.getKeyFrames().set(0, fromLeft);
+        sidewaysAnim.playFromStart();
+    }
 }

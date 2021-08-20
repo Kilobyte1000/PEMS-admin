@@ -1,6 +1,6 @@
 package edu.opjms.candidateSelector.main;
 
-import edu.opjms.candidateSelector.util.HouseIndex;
+import net.kilobyte1000.Houses;
 import javafx.collections.ObservableList;
 
 import java.io.Externalizable;
@@ -13,7 +13,7 @@ import static edu.opjms.candidateSelector.controls.ActionButtonNew.DEFAULT_NAME;
 import static java.util.Arrays.deepToString;
 import static javafx.collections.FXCollections.observableArrayList;
 
-class ListData implements Externalizable {
+public class ListData implements Externalizable {
     public static final long serialVersionUID = 234523452312L;
     private final ObservableList<String>[][] candidateList;
 
@@ -27,7 +27,7 @@ class ListData implements Externalizable {
         }
     }
 
-    public ObservableList<String> getCandidateList(HouseIndex houseIndex, int post) {
+    public ObservableList<String> getCandidateList(Houses houseIndex, int post) {
         return candidateList[houseIndex.ordinal()][post];
     }
 

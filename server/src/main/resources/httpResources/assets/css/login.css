@@ -1,0 +1,237 @@
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    min-width: 800px;
+    /*min-height: 520px; */
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background: linear-gradient(to right, rgba(45,200,128,0.9), rgba(45,200,128,0.5), rgba(45,200,128,0.9));
+    display: flex;
+    flex-direction: column;
+}
+
+
+@supports not (contain: none) {
+    .tooltip {
+        top: 22%;
+    }
+    .underline {
+        bottom: 2%;
+    }
+}
+@supports not (--c: v) {
+    body > *{
+        display: none !important;
+    }
+    body:before {
+        font-size: 4em;
+        font-family: system-ui, sans-serif;
+        justify-content: center;
+        align-content: center;
+        content: "SORRY! BROWSER NOT SUPPORTED. ONLY CHROME VERSIONS 49 AND ABOVE ARE SUPPORTED";
+        text-align: center;
+
+    }
+}
+
+header, footer {
+    display: block;
+    background-color: #101010;
+    margin: 0;
+    text-align: center;
+    color: white;
+    text-transform: uppercase;
+    font-size: 300%;
+    font-weight: bold;
+    font-family: "Trebuchet MS", "Segoe UI", "Tahoma", serif;
+}
+
+footer {
+    margin-top: auto;
+}
+
+header div {
+    display: inline-block;
+    transform: translateY(-50%);
+}
+
+main {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form {
+    width: 73%;
+    min-height: 65%;
+
+    background: #f2f3f6;
+    border-radius: 1.8em;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+
+    font-family: Arial, sans-serif;
+    padding: 1.4em 0;
+    margin: 2em;
+}
+
+p {
+    color: #c83c32;
+    font-size: 1.2em;
+}
+
+
+form section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: flex-end;
+}
+
+form .container {
+    display: flex;
+    width: 85%;
+    margin: 1.3em 0;
+}
+
+.container .label {
+    width: 50%;
+
+}
+
+.container .label {
+    font-size: 1.7em;
+    color: #525252;
+}
+
+.container .input-text-field {
+    width: 50%;
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.input-text-field {
+    flex-direction: column;
+    justify-content: flex-end;
+    bottom: .2em;
+}
+
+.input-text-field.date {
+    width: auto;
+}
+
+.input-text-field label {
+    position: absolute;
+}
+
+.input-text-field input {
+    width: 99%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid grey;
+    font-size: 1.2em;
+    outline: none;
+    font-family: Arial, sans-serif;
+    line-height: 1em;
+}
+
+
+input ~ .tooltip {
+    font-size: 1.3em;
+    color: #9e9e9e;
+    transition: all ease 200ms;
+    left: 0.5%;
+}
+
+
+input:focus ~ .tooltip, input:valid ~ .tooltip, input:invalid:not(:placeholder-shown) ~ .tooltip {
+    font-size: 1em;
+    transform: translateY(-125%);
+}
+
+input:invalid:not(:placeholder-shown) ~ .tooltip {
+    color: red;
+}
+
+input:focus ~ .tooltip, input:valid ~ .tooltip {
+    color: blue;
+}
+
+.underline {
+    position: absolute;
+    box-sizing: border-box;
+    border-bottom: 2px solid blue;
+    width: 0;
+    transition: all ease-out 200ms;
+}
+
+input:focus ~ .underline {
+    width: 99.9%;
+}
+
+input:invalid:not(:placeholder-shown) ~ .underline {
+    border-bottom-color: red;
+}
+
+select {
+    font-size: 1.2em;
+    background-color: unset;
+    border: none;
+    border-bottom: 1px solid grey;
+    cursor: pointer;
+    outline: none;
+    margin-right: 1.2em;
+}
+
+select:focus {
+    border-bottom: 2px solid blue;
+}
+
+option
+{
+    font-family: Arial, sans-serif;
+}
+
+@media screen and (max-width: 920px) {
+    form {
+        width: 80%;
+    }
+}
+
+.button {
+    font-size: 1.1em;
+    padding: .8em 1.6em;
+    color: white;
+    border-radius: 0.2em;
+    background: #139056;
+    border: 0;
+    transition: all 300ms ease;
+    box-shadow: 1px 7px 9px 3px hsl(152 84% 20% / 0.42);
+    margin-top: 0.8em;
+}
+
+.button:hover {
+    background: #0d824b;
+}
+
+.button:active {
+    outline: none;
+    box-shadow: 1px 7px 9px -6px hsl(152 84% 20% / 0.42);
+    transform: translateY(6%);
+}

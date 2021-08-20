@@ -1,19 +1,16 @@
 package edu.opjms.main;
 
-import edu.opjms.fileListPopup.systemFolder.FolderProviderKt;
+import edu.opjms.fileListPopup.FileListPopup;
+import edu.opjms.global.systemFolder.FolderProviderKt;
 import edu.opjms.templating.Templator;
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import jfxtras.styles.jmetro.JMetro;
+import jfxtras.styles.jmetro.Style;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Main extends Application {
 
@@ -34,10 +31,19 @@ public class Main extends Application {
 */
 
 //            primaryStage.setScene(scene);
-        Templator templator = new Templator(primaryStage, getHostServices());
+        final var templateDataFolder = FolderProviderKt.getDataFolder().resolve("templates");
 
 
-/*        final int year = FolderProviderKt.getCurrentSession();
+
+
+
+
+
+        Templator templator = new Templator(primaryStage, getHostServices(), templateDataFolder);
+//        var scene = new Scene(templator)
+
+
+       /* final int year = FolderProviderKt.getCurrentSession();
         final File parent = FolderProviderKt.getDataFolder();
 
         final File thisSession = FolderProviderKt.sessionFolder(year, parent);
@@ -47,19 +53,19 @@ public class Main extends Application {
         System.out.println(oldSession.getPath());
 
         Scene scene = new Scene(new FileListPopup(thisSession, oldSession));
-        scene.setFill(Color.WHITESMOKE);
+        scene.setFill(Color.WHITESMOKE);*/
 
-        primaryStage.setScene(scene);
-        new JMetro(scene, Style.LIGHT);
+//        primaryStage.setScene(scene);
+//        new JMetro(scene, Style.LIGHT);
 
-        new Thread(this::createFolder).start();*/
+//        new Thread(this::createFolder).start();
 
         primaryStage.show();
 
 
     }
 
-    private void createFolder() {
+    /*private void createFolder() {
         final File dataFolder = FolderProviderKt.getDataFolder();
         final var dataFolderPath = Path.of(dataFolder.toURI());
 
@@ -135,7 +141,8 @@ public class Main extends Application {
             e.printStackTrace();
         }
 
-    }
+    }*/
+
 
     /**
      * Returns the integral value of string. Returns -1 if string's length > 4 or string contains

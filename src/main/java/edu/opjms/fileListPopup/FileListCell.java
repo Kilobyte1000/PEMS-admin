@@ -13,6 +13,7 @@ import javafx.util.StringConverter;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.function.Consumer;
 
 import static java.lang.Double.MAX_VALUE;
 
@@ -20,9 +21,9 @@ final class FileListCell extends TextFieldListCell<File> {
 
     private final HBox wrapper = new HBox();
     private final Label fileName = new Label();
-    private final OpenAction action;
+    private final Consumer<File> action;
 
-    public FileListCell(OpenAction action) {
+    public FileListCell(Consumer<File> action) {
         super();
 
         this.action = action;
@@ -132,7 +133,7 @@ final class FileListCell extends TextFieldListCell<File> {
         if (getItem().getName().equals(FileListPopup.TEMP_FILENAME))
             super.startEdit();
         else
-            action.openFile(getItem());
+            action.accept(getItem());
     }
 
     @Override

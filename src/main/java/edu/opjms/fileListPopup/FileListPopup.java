@@ -5,7 +5,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitMenuButton;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
@@ -14,7 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
-
+import java.util.function.Consumer;
 import java.io.File;
 import java.io.IOException;
 
@@ -59,11 +63,12 @@ public class FileListPopup extends VBox {
         */
         final ListView<File> listView = new ListView<>();
 
-        final var files = FXCollections.observableArrayList(dir.listFiles((dir1, name) -> name.endsWith(EXTENSION)));
+//        final var files = FXCollections.observableArrayList(dir.listFiles((dir1, name) -> name.endsWith(EXTENSION)));
+        final var files = FXCollections.<File>observableArrayList(new File("D:\\as.fg"));
 
 
 
-        files.sort(File::compareTo);
+//        files.sort(File::compareTo);
         Label placeholder = new Label("No file found");
         placeholder.setTextFill(Paint.valueOf("rgb(25,25,25)"));
 
@@ -77,7 +82,7 @@ public class FileListPopup extends VBox {
         listView.setItems(filteredFiles);
         listView.setEditable(true);
 
-        OpenAction action = this::openFile;
+        Consumer<File> action = this::openFile;
 
         listView.setCellFactory(fileListView -> new FileListCell(action));
 

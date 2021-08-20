@@ -1,14 +1,20 @@
 package edu.opjms.templating.inputPanes;
 
+import edu.opjms.global.inputForms.PageGeneratorKt;
 import edu.opjms.global.inputForms.RawTextFieldInput;
 import edu.opjms.templating.RawTypes;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
 
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -29,7 +35,6 @@ final public class TextFieldPane extends InputPaneBase {
     private final StringProperty tooltipProperty;
     private final boolean isUniqueField;
 
-
     public TextFieldPane() {
         this(null, null, null, null, null, false);
     }
@@ -44,26 +49,74 @@ final public class TextFieldPane extends InputPaneBase {
                          String tooltipText,
                          RawTypes rawType,
                          boolean isUniqueField) {
+        super();
 
         this.isUniqueField = isUniqueField;
 
         //Label Text
-        var label = new TextField(requireNonNullElse(labelText, ""));
-        VBox nameWrapper = wrapInVBox(new Label("Label Text"), label);
+        var label = new TextFieldChange(requireNonNullElse(labelText, ""));
+        super.labelField = label;
+        var labelErr = new Label();
+        super.labelErr = labelErr;
+        labelErr.getStyleClass().add("err");
+        if (labelText == null || labelText.isBlank()) {
+            isLabelValid = false;
+            label.pseudoClassStateChanged(ERR_CLASS, true);
+            labelErr.setText(INVALID_LABEL_ERR);
+        }
+        label.textProperty().addListener((observableValue, s, newVal) -> {
+            isLabelValid = !newVal.isBlank();
+            if (!isLabelDuplicate) {
+                labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
+                label.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+            }
+        });
+        VBox nameWrapper = wrapInVBox(new Label("Label Text"), label, labelErr);
 
 
         //placeholder
-        var placeholderField = new TextField(requireNonNullElse(placeholderText, ""));
-        VBox placeholderWrapper = wrapInVBox(new Label("Placeholder"), placeholderField);
+        final var placeholderField = new TextField(requireNonNullElse(placeholderText, ""));
+        final var placeholderErr = new Label();
+        placeholderErr.getStyleClass().add("err");
+        placeholderErr.setText("placeholder must be set");
+        //error handling
+        final var isPlaceholderInvalid = placeholderText == null || placeholderText.isBlank();
+        placeholderField.pseudoClassStateChanged(ERR_CLASS, isPlaceholderInvalid);
+        labelErr.setVisible(isPlaceholderInvalid);
+        labelErr.setManaged(isPlaceholderInvalid);
+        //listener
+        placeholderField.textProperty()
+                .addListener((observableValue, s, newVal) -> {
+                    final var isBlank = newVal.isBlank();
+                    placeholderErr.setVisible(isBlank);
+                    placeholderErr.setManaged(isBlank);
+                    placeholderField.pseudoClassStateChanged(ERR_CLASS, isBlank);
+                });
+        VBox placeholderWrapper = wrapInVBox(new Label("Placeholder"), placeholderField, placeholderErr);
         placeholderTextProperty = placeholderField.textProperty();
 
 
         //Type of input - helpful in many ways
         var box = new ComboBox<>(observableArrayList(RawTypes.NUMBER, RawTypes.TEXT));
-        VBox typeWrapper = wrapInVBox(new Label("Type"), box);
+        var typeErr = new Label();
+        typeErr.getStyleClass().add("err");
+        typeErr.setText("type must be set");
+        //error handling
+        final var isTypeNull = rawType == null;
+        box.pseudoClassStateChanged(ERR_CLASS, isTypeNull);
+        typeErr.setManaged(isTypeNull);
+        typeErr.setVisible(isTypeNull);
+        //listener
+        box.getSelectionModel().selectedItemProperty().addListener((observableValue, rawTypes, t1) -> {
+            var isNull = t1 == null;
+            typeErr.setVisible(isNull);
+            typeErr.setManaged(isNull);
+            box.pseudoClassStateChanged(ERR_CLASS, isNull);
+        });
+        VBox typeWrapper = wrapInVBox(new Label("Type"), box, typeErr);
         selectedTypeProperty = box.getSelectionModel().selectedItemProperty();
 
-        //if this is unique field, then it must be a number
+        //if this is unique field, override provided type and set to number
         if (isUniqueField) {
             box.getSelectionModel().selectFirst();
             box.setDisable(true);
@@ -75,7 +128,7 @@ final public class TextFieldPane extends InputPaneBase {
         regexProperty = regexField.textProperty();
 
         errLabel.setVisible(false);
-        errLabel.setStyle("-fx-text-fill: red");
+        errLabel.getStyleClass().add("err");
 
         //if regex is invalid set error = true and warn user
         regexField.focusedProperty().addListener((observableValue, aBoolean, newValue) -> {
@@ -85,11 +138,15 @@ final public class TextFieldPane extends InputPaneBase {
                 } catch (PatternSyntaxException p) {
                     regexField.setStyle("-fx-background-color: red, white;"); //red border
                     errLabel.setVisible(true);
+                    errLabel.setManaged(true);
                     isRegexInvalid = true;
                 }
             } else {
                 regexField.setStyle("");
-                if (errLabel.isVisible()) errLabel.setVisible(false);
+                if (errLabel.isVisible()) {
+                    errLabel.setVisible(false);
+                    errLabel.setManaged(false);
+                }
                 isRegexInvalid = false;
             }
         });
@@ -97,7 +154,7 @@ final public class TextFieldPane extends InputPaneBase {
 
         //tooltip
         Label tooltipLabel = new Label("Tooltip (Optional)");
-        Tooltip tooltip = new Tooltip("A tooltip is a popup text (like this one) useful for giving explaination.\nIf you are using regex, then the tooltip should define how the text should be formatted");
+        Tooltip tooltip = new Tooltip("A tooltip is a popup text (like this one) useful for giving explanation.\nIf you are using regex, then the tooltip should define how the text should be formatted");
 
         tooltipLabel.setTooltip(tooltip);
         var tooltipTextArea = new TextArea(requireNonNullElse(tooltipText, ""));
@@ -108,17 +165,25 @@ final public class TextFieldPane extends InputPaneBase {
 
         VBox tooltipWrapper = wrapInVBox(tooltipLabel, tooltipTextArea);
 
-        FlowPane wrapper = wrapInFlowPane(nameWrapper, placeholderWrapper, typeWrapper, tooltipWrapper);
+        FlowPane wrapper = wrapInFlowPane(nameWrapper, placeholderWrapper, typeWrapper, regexWrapper, tooltipWrapper);
         JMetroStyleClass.addIfNotPresent(wrapper.getStyleClass(), JMetroStyleClass.BACKGROUND);
 
         //type and regex binds
         box.getSelectionModel().selectedIndexProperty().addListener((observableValue, number, t1) -> {
-            if (t1.intValue() == 0) //number is selected
-                wrapper.getChildren().remove(regexWrapper); //remove last (regex) node
-            else
-                wrapper.getChildren().add(3, regexWrapper);
+            if (t1.intValue() == 0) { //number is selected
+                //remove regex node from layout
+                regexWrapper.setVisible(false);
+                regexWrapper.setManaged(false);
+//                wrapper.getChildren().remove(regexWrapper); //remove last (regex) node
+            } else {
+                regexWrapper.setVisible(true);
+                regexWrapper.setManaged(true);
+//                wrapper.getChildren().add(3, regexWrapper);
+            }
 
         });
+        regexWrapper.setVisible(false);
+        regexWrapper.setManaged(false);
         if (rawType != null)
             box.getSelectionModel().select(rawType);
         else if (regex != null)
@@ -126,97 +191,61 @@ final public class TextFieldPane extends InputPaneBase {
 
         configureSuper(label.textProperty(), isUniqueField? UNIQUE_SUFFIX: SUFFIX);
 
+        /*this.focusedProperty().addListener((observableValue, aBoolean, t1) -> {
+            if (isFocused()) hideErrHints();
+            else showErrHints();
+        });*/
+
+
         setContent(wrapper);
     }
 
+    /*@Override
+    public void showDuplicateError(boolean value) {
+        if (isLabelDuplicate != value) {
+            if (value) {
+                labelErr.setText(DUPLICATE_ERR);
+                labelField.pseudoClassStateChanged(ERR_CLASS, true);
+            } else {
+                labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
+                labelField.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+            }
+            isLabelDuplicate = value;
+        }
+    }*/
+
+    @Override
+    public void setOnLabelChange(BiConsumer<String, String> func) {
+        labelField.setOnTextChange(func);
+    }
+
+
     @Override
     public String generateHTML(int id) {
-        if (containsError())
-            return "";
-
-        //we add id to prevent collisions with other fields
-        final var idText = "c" + id + "-";
-
         final var labelText = escapeHtml4(getLabelText().strip());
         final var placeholderText = escapeHtml4(placeholderTextProperty.getValue().strip());
-        final var typeText = selectedTypeProperty.get().toString();
-        System.out.println(typeText);
-        final var regexText = escapeHtml4(regexProperty.getValue().strip());
-        final var tooltipText = escapeHtml4(tooltipProperty.getValue().strip());
-        final var dbName = escapeHtml4(idText + getLabelText().substring(0, 3).strip());
-        final var fieldID = dbName + "_field";
+        final var type = selectedTypeProperty.get();
+        final var typeText = type != null? type.toString(): "";
+        var regexText = escapeHtml4(regexProperty.getValue().strip());
+        regexText = regexText.isEmpty()? null: regexText;
+        var tooltipText = escapeHtml4(tooltipProperty.getValue().strip());
+        tooltipText = tooltipText.isEmpty()? null: tooltipText;
 
-        final var isRegexUsed = !regexText.isBlank() && selectedTypeProperty.get().equals(RawTypes.TEXT);
-        final var isTooltipUsed = !tooltipText.isBlank();
-
-        /*
-        * we do some calculation to find out size of html in advance
-        * and set size of StringBuilder accordingly to prevent resize
-        * and improve performance
-        */
-
-        //length of doc without regex, tooltip and any data
-        final short baseDoc = 252;
-        //length of regex template
-        final byte baseRegex = 9;
-        final byte baseTooltip = 11;
-
-        //perform calculations
-
-        //adding length of necessary fields and base
-        int length = baseDoc + fieldID.length()*3 + labelText.length()
-                + typeText.length() + dbName.length() + placeholderText.length();
-
-        if (isRegexUsed)
-            length += baseRegex + regexText.length();
-        if (isTooltipUsed)
-            length += baseTooltip + tooltipText.length();
-        
-        StringBuilder gen = new StringBuilder(length);
-
-        //construct the page
-
-        //container div and label
-        gen.append("<div class='container'><div class='label'><label for='");
-        gen.append(fieldID);
-        gen.append("'>");
-        gen.append(labelText);
-
-        //the input
-        gen.append("</label></div><div class='input-text-field'><input id='");
-        gen.append(fieldID);
-        gen.append("' type='");
-        gen.append(typeText);
-        gen.append("' name='");
-        gen.append(dbName);
-        gen.append("' placeholder=' ' autocomplete='off'");
-        if (isTooltipUsed) {
-            gen.append(" title='");
-            gen.append(tooltipText);
-            gen.append("'");
-        }
-        if (isRegexUsed) {
-            gen.append(" pattern='");
-            gen.append(regexText);
-            gen.append("'");
-        }
-
-        //the placeholder label
-        gen.append(" required><label for='");
-        gen.append(fieldID);
-        gen.append("' class='tooltip'>");
-        gen.append(placeholderText);
-
-        //close label, add material underline, close input-div, close container-div
-        gen.append("</label><div class='underline'></div></div></div>");
-
-        return gen.toString();
+        return PageGeneratorKt.genTextInput(labelText,
+                placeholderText,
+                typeText,
+                regexText,
+                tooltipText,
+                genErrMessage());
     }
 
     @Override
     public boolean containsError() {
-        return isRegexInvalid || getLabelText().isBlank()
-                || placeholderTextProperty.getValue().isBlank();
+        return isRegexInvalid
+                || getLabelText().isBlank()
+                || selectedTypeProperty.get() == null
+                || placeholderTextProperty.getValue().isBlank()
+                || isLabelDuplicate;
     }
 
     @Override
@@ -226,9 +255,33 @@ final public class TextFieldPane extends InputPaneBase {
                 selectedTypeProperty.get(),
                 regexProperty.get(),
                 tooltipProperty.getValue(),
-                isUniqueField);
+                isUniqueField,
+                isLabelDuplicate);
     }
 
+
+    private String genErrMessage() {
+        final var isLabelBlank = getLabelText().isBlank();
+        final var isPlaceholderBlank = placeholderTextProperty.getValue().isBlank();
+        final var isTypeSelected = selectedTypeProperty.get() == null;
+
+        if (isLabelBlank || isPlaceholderBlank || isTypeSelected || isRegexInvalid || isLabelDuplicate) {
+            var builder = new StringBuilder("<ul>");
+            if (isLabelBlank)
+                builder.append("<li>Label Name is not provided</li>");
+            if (isPlaceholderBlank)
+                builder.append("<li>Placeholder is not provided</li>");
+            if (isTypeSelected)
+                builder.append("<li>Type is not provided</li>");
+            if (isRegexInvalid)
+                builder.append("<li>Provided regex: '").append(escapeHtml4(regexProperty.get())).append("' is invalid</li>");
+            if (isLabelDuplicate)
+                builder.append("<li>Duplicate field: '").append(escapeHtml4(getLabelText())).append("'</li>");
+            builder.append("</ul>");
+            return builder.toString();
+        } else
+            return null;
+    }
 
     //boilerplate
 

@@ -1,0 +1,14 @@
+<script type='text/javascript'>function toggleVisible(evt) {
+    button = evt.currentTarget
+    div = button.parentNode.getElementsByTagName('div')[0]
+    isHidden = div.style.opacity == 0
+    if (isHidden) {
+        button.text = "Hide Errors"
+        div.style.opacity = 1
+        div.style.display = "block"
+    } else {
+        button.text = "Show Errors"
+        div.style.opacity = 0
+        div.style.display = "none"
+    }
+}</script>

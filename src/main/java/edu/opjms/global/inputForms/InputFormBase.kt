@@ -1,15 +1,12 @@
 package edu.opjms.global.inputForms
 
 import edu.opjms.templating.RawTypes
-import edu.opjms.templating.inputPanes.InputPaneBase
-import edu.opjms.templating.inputPanes.SelectFieldGroupPane
-import edu.opjms.templating.inputPanes.SelectFieldPane
-import edu.opjms.templating.inputPanes.TextFieldPane
+import edu.opjms.templating.inputPanes.*
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed class RawInputFormBase {
-    abstract fun toInputPane(): InputPaneBase
+
+interface RawInputFormBase {
+    fun toInputPane(): InputPaneBase
 }
 
 @Serializable
@@ -19,8 +16,9 @@ data class RawTextFieldInput(
         val rawType: RawTypes,
         val regex: String,
         val tooltipText: String,
-        val isUniqueField: Boolean
-): RawInputFormBase() {
+        val isUniqueField: Boolean,
+        val isDuplicate: Boolean
+): RawInputFormBase {
     override fun toInputPane() =
             TextFieldPane(labelText, placeholderText, regex, tooltipText, rawType, isUniqueField)
 }
@@ -29,8 +27,9 @@ data class RawTextFieldInput(
 data class RawSelectField(
         val labelText: String,
         val rawType: RawTypes,
-        val pairs: Array<Pair<String, String>>?
-): RawInputFormBase() {
+        val pairs: Array<Pair<String, String>>?,
+        val isDuplicate: Boolean
+): RawInputFormBase {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is RawSelectField) return false
@@ -57,12 +56,7 @@ data class RawSelectField(
 }
 
 @Serializable
-data class RawSelectGroup(
-        val delimiter: String,
-        val selects: List<RawSelectField>
-): RawInputFormBase() {
-    override fun toInputPane(): InputPaneBase {
-        val list = List(selects.size) { selects[it].toInputPane() }
-        return SelectFieldGroupPane(delimiter, list)
-    }
+data class RawDateInput(val labelText: String, val isDuplicate: Boolean): RawInputFormBase {
+    override fun toInputPane() =
+            DateInputPane(labelText)
 }
