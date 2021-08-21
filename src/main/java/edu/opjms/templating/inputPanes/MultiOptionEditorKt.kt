@@ -27,11 +27,8 @@ class MultiOptionEditorKt(
 ): GridPane() {
 
     private var duplicates = 0
-    set(value) {
-        field = value
-        println(value)
-    }
-    //todo: keep this updated
+
+    @Suppress("SpellCheckingInspection")
     private var nonNumerics = 0
 
     private val fieldData = ArrayList<FieldData>()
@@ -105,18 +102,16 @@ class MultiOptionEditorKt(
             
         }
 
-        internalField.onTextChange = BiConsumer { _, new ->
-            val i = getRowIndex(internalField)
-            val isNumeric = new.isEmpty() || new.isDouble()
-            fieldData[i - 1].isNumeric = isNumeric
-            updateErrorHints(i)
+        internalField.focusedProperty().addListener { _, _, _ ->
+            if (!internalField.isFocused) {
+                val i = getRowIndex(internalField)
+                setNumeric(i, internalField.text)
+            }
         }
         internalField.textProperty().addListener { _, _, new ->
             val i = getRowIndex(internalField)
             if (!fieldData[i - 1].isNumeric) {
-                val isNumeric = new.isBlank() || new.isDouble()
-                fieldData[i - 1].isNumeric = isNumeric
-                updateErrorHints(i)
+                setNumeric(i, new)
             }
         }
 
@@ -165,8 +160,6 @@ class MultiOptionEditorKt(
             val index = getFirstIndexOfRow(rowIndex)
             children.addAll(index, list)
         }
-
-
     }
 
     private fun deleteRow(rowIndex: Int) {
@@ -177,6 +170,9 @@ class MultiOptionEditorKt(
             val data = fieldData.removeAt(rowIndex - 1)
             if (data.isDuplicate) {
                 duplicates--
+            }
+            if (!data.isNumeric) {
+                nonNumerics--
             }
 
             val nodesBeforeRow = getFirstIndexOfRow(rowIndex)
@@ -222,10 +218,20 @@ class MultiOptionEditorKt(
         val data = fieldData[index]
         if (data.isDuplicate != isDuplicate) {
             data.isDuplicate = isDuplicate
-            duplicates += if (isDuplicate) 1 else -1
+            duplicates += boolToInt(isDuplicate)
 
             updateErrorHints(index + 1)
         }
+    }
+
+    private fun setNumeric(rowIndex: Int, text: String) {
+        val isNumeric = text.isBlank() || text.isDouble()
+        val data = fieldData[rowIndex - 1]
+        if (data.isNumeric != isNumeric) {
+            nonNumerics += boolToInt(!isNumeric)
+        }
+        data.isNumeric = isNumeric
+        updateErrorHints(rowIndex)
     }
 
     private fun updateErrorHints(index: Int) {
@@ -249,9 +255,7 @@ class MultiOptionEditorKt(
 
     private fun updateDuplicates(string: String) {
         val task = object : Task<Unit>() {
-
             lateinit var indices: IntArray
-
             init {
                 onSucceeded = EventHandler {
                     val isDuplicate = indices.size > 1
@@ -260,11 +264,9 @@ class MultiOptionEditorKt(
                     }
                 }
             }
-
             override fun call() {
                 indices = searchString(string, visibleValueIterator(), rowCount - 1)
             }
-
         }
         executor.submit(task)
     }
@@ -302,7 +304,9 @@ class MultiOptionEditorKt(
 
     private fun autoFill(textField: TextField, old: String, new: String) {
         if (doAutoFill.get() && textField.text.equals(old, true)) {
-            textField.text = new.toLowerCase()
+            val text = new.toLowerCase()
+            textField.text = text
+            setNumeric(getRowIndex(textField), text)
         }
     }
 
@@ -325,6 +329,7 @@ class MultiOptionEditorKt(
         }
 
     }
+
     fun hasError() = duplicates != 0 || (doValidation.get() && nonNumerics != 0)
 
 
@@ -333,6 +338,7 @@ class MultiOptionEditorKt(
         private const val NODES_IN_EACH_ROW = 5
         private const val DUPLICATE_MESSAGE = "Display Text is Duplicate"
         private const val NON_NUMERIC_MESSAGE = "Internal Value is not a Number"
+        private fun boolToInt(boolean: Boolean) = if (boolean) 1 else -1
     }
 
     private data class FieldData(var isDuplicate: Boolean = false, var isNumeric: Boolean = true)
