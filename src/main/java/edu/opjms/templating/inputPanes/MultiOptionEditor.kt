@@ -14,16 +14,18 @@ import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.GridPane
+import kotlinx.serialization.Serializable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.BiConsumer
+typealias StringPair = Pair<String, String>
 
-
-class MultiOptionEditorKt(
+class MultiOptionEditor(
         hGap: Double,
         vGap: Double,
         private val doValidation: BooleanExpression,
         private val doAutoFill: BooleanExpression,
+        fieldData: FieldData? = null
 ): GridPane() {
 
     private var duplicates = 0
@@ -31,7 +33,7 @@ class MultiOptionEditorKt(
     @Suppress("SpellCheckingInspection")
     private var nonNumerics = 0
 
-    private val fieldData = ArrayList<FieldData>()
+    private val fieldMetadata = ArrayList<FieldMetadata>()
 
     var executor: ExecutorService = Executors.newCachedThreadPool { Thread(it).apply { isDaemon = true } }
     set(value) {
@@ -48,6 +50,20 @@ class MultiOptionEditorKt(
         val internalLabel = Label("Internal Values")
         addRow(0, visibleLabel, internalLabel)
 
+        if (fieldData != null) {
+            val (pairs, duplicates, nonNumerics) = fieldData
+            fieldMetadata.ensureCapacity(pairs.size)
+
+            for (i in pairs.indices) {
+                val pair = pairs[i]
+                addField(pair.first, pair.second, bindEmptyFieldHandler = false)
+                fieldMetadata[i].apply {
+                    isDuplicate = pair.first.toLowerCase() in duplicates
+                    isNumeric = pair.second.toLowerCase() !in nonNumerics
+                }
+                updateErrorHints(i + 1)
+            }
+        }
         addField()
 
         isLastFieldEmpty.addListener { _, _, isEmpty ->
@@ -68,7 +84,7 @@ class MultiOptionEditorKt(
             bindEmptyFieldHandler: Boolean = rowIndex == rowCount
     ) {
 
-        fieldData.add(rowIndex - 1, FieldData())
+        fieldMetadata.add(rowIndex - 1, FieldMetadata())
         val isLast = rowIndex == rowCount
         val visibleField = getTextField(visibleValue)
         val internalField = getTextField(internalValue)
@@ -91,7 +107,7 @@ class MultiOptionEditorKt(
 
         visibleField.onTextChange = BiConsumer { old, new ->
             val i = getRowIndex(visibleField) - 1
-            if (old.isNotEmpty() && fieldData[i].isDuplicate) {
+            if (old.isNotEmpty() && fieldMetadata[i].isDuplicate) {
                 updateDuplicates(old)
             }
             if (new.isNotEmpty()) {
@@ -110,7 +126,7 @@ class MultiOptionEditorKt(
         }
         internalField.textProperty().addListener { _, _, new ->
             val i = getRowIndex(internalField)
-            if (!fieldData[i - 1].isNumeric) {
+            if (!fieldMetadata[i - 1].isNumeric) {
                 setNumeric(i, new)
             }
         }
@@ -167,7 +183,7 @@ class MultiOptionEditorKt(
 
         //removing last row is forbidden
         if (rowIndex < rows - 1) {
-            val data = fieldData.removeAt(rowIndex - 1)
+            val data = fieldMetadata.removeAt(rowIndex - 1)
             if (data.isDuplicate) {
                 duplicates--
             }
@@ -215,7 +231,7 @@ class MultiOptionEditorKt(
     }
 
     private fun setDuplicate(index: Int, isDuplicate: Boolean) {
-        val data = fieldData[index]
+        val data = fieldMetadata[index]
         if (data.isDuplicate != isDuplicate) {
             data.isDuplicate = isDuplicate
             duplicates += boolToInt(isDuplicate)
@@ -226,7 +242,7 @@ class MultiOptionEditorKt(
 
     private fun setNumeric(rowIndex: Int, text: String) {
         val isNumeric = text.isBlank() || text.isDouble()
-        val data = fieldData[rowIndex - 1]
+        val data = fieldMetadata[rowIndex - 1]
         if (data.isNumeric != isNumeric) {
             nonNumerics += boolToInt(!isNumeric)
         }
@@ -235,7 +251,7 @@ class MultiOptionEditorKt(
     }
 
     private fun updateErrorHints(index: Int) {
-        val data = fieldData[index - 1]
+        val data = fieldMetadata[index - 1]
         val children = children
         val i = getFirstIndexOfRow(index)
         val visibleField = children[i]
@@ -252,6 +268,8 @@ class MultiOptionEditorKt(
             else -> ""
         }
     }
+
+    //todo: add function updateErrorHintsRange
 
     private fun updateDuplicates(string: String) {
         val task = object : Task<Unit>() {
@@ -330,7 +348,69 @@ class MultiOptionEditorKt(
 
     }
 
-    fun hasError() = duplicates != 0 || (doValidation.get() && nonNumerics != 0)
+    fun containsError() = duplicates != 0 || (doValidation.get() && nonNumerics != 0)
+
+    fun getPairs(): List<StringPair> {
+        //excluding first (header) and last (always empty)
+        var nodeIndex = getFirstIndexOfRow(1)
+        val children = childrenUnmodifiable
+        return List(rowCount - 2) {
+            val visibleField = children[nodeIndex] as TextField
+            val internalField = children[nodeIndex + 1] as TextField
+
+            nodeIndex += NODES_IN_EACH_ROW
+            visibleField.text to internalField.text
+        }
+    }
+
+    fun getPairsAndDuplicates(): FieldsAndDuplicates {
+        //excluding first (header) and last (always empty)
+        var nodeIndex = getFirstIndexOfRow(1)
+        val children = childrenUnmodifiable
+        val duplicates = HashSet<String>(duplicates)
+
+        val fields = List(rowCount - 2) {
+            val visibleText = (children[nodeIndex] as TextField).text
+            val internalText = (children[nodeIndex + 1] as TextField).text
+            val lowCaseVisibleText = visibleText.toLowerCase()
+
+            if (fieldMetadata[it].isDuplicate && lowCaseVisibleText !in duplicates) {
+                duplicates.add(lowCaseVisibleText)
+            }
+
+            nodeIndex += NODES_IN_EACH_ROW
+            visibleText to internalText
+        }
+
+        return FieldsAndDuplicates(fields, duplicates)
+    }
+
+    fun getPairsAndData(): FieldData {
+        //excluding first (header) and last (always empty)
+        var nodeIndex = getFirstIndexOfRow(1)
+        val children = childrenUnmodifiable
+        val duplicates = HashSet<String>(duplicates)
+        val nonNumeric = HashSet<String>(duplicates)
+
+        val fields = List(rowCount - 2) {
+            val visibleText = (children[nodeIndex] as TextField).text
+            val internalText = (children[nodeIndex + 1] as TextField).text
+            val lowCaseVisibleText = visibleText.toLowerCase()
+            val metadata = fieldMetadata[it]
+
+            if (metadata.isDuplicate && lowCaseVisibleText !in duplicates) {
+                duplicates.add(lowCaseVisibleText)
+            }
+            if (!metadata.isNumeric && lowCaseVisibleText !in nonNumeric) {
+                nonNumeric.add(lowCaseVisibleText)
+            }
+
+            nodeIndex += NODES_IN_EACH_ROW
+            visibleText to internalText
+        }
+
+        return FieldData(fields, duplicates, nonNumeric)
+    }
 
 
     private companion object {
@@ -338,39 +418,42 @@ class MultiOptionEditorKt(
         private const val NODES_IN_EACH_ROW = 5
         private const val DUPLICATE_MESSAGE = "Display Text is Duplicate"
         private const val NON_NUMERIC_MESSAGE = "Internal Value is not a Number"
+        private fun String.isDouble(): Boolean {
+            val length: Int = length
+
+            if (length > 306) //double overflows at 1.7*10^308, so it is good idea to stop at 306 digits
+                return false
+
+            var i = 0
+
+            if (this[0] == '-') {
+                if (length == 1) return false
+                i = 1
+            }
+
+            var encounteredDecimal = false
+
+            while (i < length) {
+                val c: Char = this[i]
+                if (c == '.') {
+                    if (!encounteredDecimal) {
+                        encounteredDecimal = true
+                        i++
+                        continue
+                    } else return false
+                }
+                if (c < '0' || c > '9') return false
+                i++
+            }
+
+            return true
+        }
         private fun boolToInt(boolean: Boolean) = if (boolean) 1 else -1
     }
 
-    private data class FieldData(var isDuplicate: Boolean = false, var isNumeric: Boolean = true)
-    private fun String.isDouble(): Boolean {
-        val length: Int = length
-
-        if (length > 306) //double overflows at 1.7*10^308, so it is good idea to stop at 306 digits
-            return false
-
-        var i = 0
-
-        if (this[0] == '-') {
-            if (length == 1) return false
-            i = 1
-        }
-
-        var encounteredDecimal = false
-
-        while (i < length) {
-            val c: Char = this[i]
-            if (c == '.') {
-                if (!encounteredDecimal) {
-                    encounteredDecimal = true
-                    i++
-                    continue
-                } else return false
-            }
-            if (c < '0' || c > '9') return false
-            i++
-        }
-
-        return true
-    }
+    private data class FieldMetadata(var isDuplicate: Boolean = false, var isNumeric: Boolean = true)
+    data class FieldsAndDuplicates(val pairs: List<StringPair>, val duplicates: Set<String>)
+    @Serializable
+    data class FieldData(val pairs: List<StringPair>, val duplicates: Set<String>, val nonNumeric: Set<String>)
 
 }

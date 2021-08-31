@@ -121,7 +121,17 @@ final public class Templator {
             addToLastOfPane(inputField, inputWrapper);
         });
 
-        addFieldButton.getItems().addAll(textFieldMenu, selectFieldMenu, dateInputMenu);
+        var booleanInputMenu = new MenuItem("Add new Boolean Input");
+        booleanInputMenu.setOnAction(event -> {
+            var inputField = new BooleanFieldPane();
+            inputField.setDeletable();
+            inputField.allowDND();
+            inputField.setSnackbar(snackBar);
+            inputField.setOnLabelChange(model::checkForDuplicates);
+            addToLastOfPane(inputField, inputWrapper);
+        });
+
+        addFieldButton.getItems().addAll(textFieldMenu, selectFieldMenu, dateInputMenu, booleanInputMenu);
         VBox.setMargin(addFieldButton, new Insets(20, 0, 30, 30));
 
 
@@ -206,7 +216,7 @@ final public class Templator {
             protected Task<Void> createTask() {
                 return new Task<>() {
                     @Override
-                    protected Void call() throws Exception {
+                    protected Void call() {
                         model.changeToPath(path);
                         return null;
                     }
@@ -221,7 +231,9 @@ final public class Templator {
             a.start();
         });
 
-        a.setOnFailed(workerStateEvent -> workerStateEvent.getSource().getException());
+        a.setOnFailed(workerStateEvent -> {
+            throw (RuntimeException) workerStateEvent.getSource().getException();
+        });
         
         stage.setScene(scene);
 

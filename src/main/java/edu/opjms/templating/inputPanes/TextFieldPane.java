@@ -5,11 +5,7 @@ import edu.opjms.global.inputForms.RawTextFieldInput;
 import edu.opjms.templating.RawTypes;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
@@ -20,7 +16,6 @@ import java.util.regex.PatternSyntaxException;
 
 import static java.util.Objects.requireNonNullElse;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 
 final public class TextFieldPane extends InputPaneBase {
@@ -222,18 +217,15 @@ final public class TextFieldPane extends InputPaneBase {
 
     @Override
     public String generateHTML(int id) {
-        final var labelText = escapeHtml4(getLabelText().strip());
-        final var placeholderText = escapeHtml4(placeholderTextProperty.getValue().strip());
+        final var labelText = getLabelText().strip();
+        final var placeholderText = placeholderTextProperty.getValue().strip();
         final var type = selectedTypeProperty.get();
-        final var typeText = type != null? type.toString(): "";
-        var regexText = escapeHtml4(regexProperty.getValue().strip());
-        regexText = regexText.isEmpty()? null: regexText;
-        var tooltipText = escapeHtml4(tooltipProperty.getValue().strip());
-        tooltipText = tooltipText.isEmpty()? null: tooltipText;
+        final var regexText = regexProperty.getValue().strip();
+        final var tooltipText = tooltipProperty.getValue().strip();
 
         return PageGeneratorKt.genTextInput(labelText,
                 placeholderText,
-                typeText,
+                type,
                 regexText,
                 tooltipText,
                 genErrMessage());
@@ -265,22 +257,13 @@ final public class TextFieldPane extends InputPaneBase {
         final var isPlaceholderBlank = placeholderTextProperty.getValue().isBlank();
         final var isTypeSelected = selectedTypeProperty.get() == null;
 
-        if (isLabelBlank || isPlaceholderBlank || isTypeSelected || isRegexInvalid || isLabelDuplicate) {
-            var builder = new StringBuilder("<ul>");
-            if (isLabelBlank)
-                builder.append("<li>Label Name is not provided</li>");
-            if (isPlaceholderBlank)
-                builder.append("<li>Placeholder is not provided</li>");
-            if (isTypeSelected)
-                builder.append("<li>Type is not provided</li>");
-            if (isRegexInvalid)
-                builder.append("<li>Provided regex: '").append(escapeHtml4(regexProperty.get())).append("' is invalid</li>");
-            if (isLabelDuplicate)
-                builder.append("<li>Duplicate field: '").append(escapeHtml4(getLabelText())).append("'</li>");
-            builder.append("</ul>");
-            return builder.toString();
-        } else
-            return null;
+        return PageGeneratorKt.genTextErrMessage(isLabelBlank,
+                isLabelDuplicate,
+                isPlaceholderBlank,
+                isTypeSelected,
+                isRegexInvalid,
+                regexProperty.get(),
+                getLabelText());
     }
 
     //boilerplate

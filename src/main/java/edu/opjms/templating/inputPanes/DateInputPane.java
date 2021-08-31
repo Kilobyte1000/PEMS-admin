@@ -1,5 +1,6 @@
 package edu.opjms.templating.inputPanes;
 
+import edu.opjms.global.inputForms.PageGeneratorKt;
 import edu.opjms.global.inputForms.RawDateInput;
 import edu.opjms.global.inputForms.RawInputFormBase;
 import javafx.geometry.Pos;
@@ -53,31 +54,14 @@ final public class DateInputPane extends InputPaneBase {
 
     @Override
     public boolean containsError() {
-        return getLabelText().isBlank();
+        return getLabelText().isBlank() || isLabelDuplicate;
     }
 
     @Override
     public String generateHTML(int id) {
-        if (containsError())
-            return "";
-
-        //we add id to prevent collisions with other fields
-        final var idText = "c" + id + "-";
-
-        final var labelText = escapeHtml4(getLabelText().strip());
-        final var dbName = escapeHtml4(idText + getLabelText().substring(0, 3).strip());
-        final var fieldID = dbName + "_field";
-
-
-        return "<div class='container'><div class='label'><label for='" + fieldID + "'>" +
-                labelText +
-                //close label
-                "</label></div>" +
-                //input field
-                "<div class='input-text-field date'><input type='date' name='" + dbName + "'" +
-                "id='" + fieldID + "' required>" +
-                //close label, and material underline, close container div
-                "<div class='underline'></div></div></div>";
+        final var labelText = getLabelText().strip();
+        final var message = PageGeneratorKt.genDateErrMessage(isLabelDuplicate, labelText);
+        return PageGeneratorKt.genDateInput(labelText, message);
     }
 
     @Override

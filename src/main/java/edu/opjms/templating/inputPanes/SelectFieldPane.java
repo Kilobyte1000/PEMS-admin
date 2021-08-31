@@ -9,26 +9,25 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
-import kotlin.Pair;
+
+import java.util.Collections;
 
 import static java.util.Objects.requireNonNullElse;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 final public class SelectFieldPane extends InputPaneBase {
 
     private static final String SUFFIX = " - Select";
 
     public SelectFieldPane() {
-        this(null, null, null);
+        this(null, null, null, false);
     }
 
     private final MultiOptionEditor multiOptionEditor;
     private final ReadOnlyObjectProperty<RawTypes> type;
 
-    public SelectFieldPane(String labelText, RawTypes rawType, Pair<String, String>[] pairs) {
+    public SelectFieldPane(String labelText, RawTypes rawType, MultiOptionEditor.FieldData data, boolean isDuplicate) {
         super();
-
         var label = new TextFieldChange(requireNonNullElse(labelText, ""));
         labelField = label;
         var labelErr = new Label();
@@ -64,22 +63,24 @@ final public class SelectFieldPane extends InputPaneBase {
 
         type = box.getSelectionModel().selectedItemProperty();
 
-        multiOptionEditor = new MultiOptionEditor(pairs,
+        /*multiOptionEditor = new MultiOptionEditor(pairs,
                 20,
                 5,
                 label.widthProperty(),
                 box.getSelectionModel().selectedIndexProperty().isEqualTo(1),
-                box.getSelectionModel().selectedIndexProperty().isEqualTo(2));
+                box.getSelectionModel().selectedIndexProperty().isEqualTo(2));*/
 
-        var a = new MultiOptionEditorKt(20,
+        multiOptionEditor = new MultiOptionEditor(20,
                 5,
                 box.getSelectionModel().selectedIndexProperty().isEqualTo(1),
-                box.getSelectionModel().selectedIndexProperty().isEqualTo(2));
+                box.getSelectionModel().selectedIndexProperty().isEqualTo(2),
+                data);
 
         configureSuper(label.textProperty(), SUFFIX);
-        FlowPane wrapper = wrapInFlowPane(nameWrapper, typeWrapper, a);
+        FlowPane wrapper = wrapInFlowPane(nameWrapper, typeWrapper, multiOptionEditor);
         JMetroStyleClass.addIfNotPresent(wrapper.getStyleClass(), JMetroStyleClass.BACKGROUND);
         setContent(wrapper);
+        showDuplicateError(isDuplicate);
     }
 
 
@@ -93,22 +94,32 @@ final public class SelectFieldPane extends InputPaneBase {
 
     @Override
     public String generateHTML(int id) {
-        final var duplicatesAndPairs = multiOptionEditor.newToArray();
+        final var labelText = getLabelText();
+        if (type.get() == RawTypes.NUMBER) {
+            final var fieldData = multiOptionEditor.getPairsAndData();
+            final var duplicates = fieldData.getDuplicates();
+            final var pairs = fieldData.getPairs();
+            final var nonNumerics = fieldData.getNonNumeric();
+            final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates, nonNumerics);
+            return PageGeneratorKt.genSelectInput(labelText, pairs, message);
+        }
+        final var fieldData = multiOptionEditor.getPairsAndDuplicates();
+        final var duplicates = fieldData.getDuplicates();
+        final var pairs = fieldData.getPairs();
+        final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates, Collections.emptyList());
+        return PageGeneratorKt.genSelectInput(labelText, pairs, message);
+        /*final var duplicatesAndPairs = multiOptionEditor.newToArray();
         final var duplicates = duplicatesAndPairs.getDuplicates();
         final var pairs = duplicatesAndPairs.getPairs();
         final var labelText = getLabelText();
         final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates);
-        return PageGeneratorKt.genSelectInput(labelText, pairs, message);
+        return PageGeneratorKt.genSelectInput(labelText, pairs, message);*/
     }
 
-
-    MultiOptionEditor.DuplicatesAndPairs getDuplicatesAndPairs() {
-        return multiOptionEditor.newToArray();
-    }
 
     @Override
     public RawSelectField toRawInput() {
-        return new RawSelectField(getLabelText(), type.get(), multiOptionEditor.toArraySoft(), isLabelDuplicate);
+        return new RawSelectField(getLabelText(), type.get(), multiOptionEditor.getPairsAndData(), isLabelDuplicate);
     }
 
 
