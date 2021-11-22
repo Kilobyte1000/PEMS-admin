@@ -6,14 +6,16 @@ import edu.opjms.templating.RawTypes;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
-
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.Objects.requireNonNullElse;
 import static javafx.collections.FXCollections.observableArrayList;
+import static edu.opjms.global.CommonKt.ERROR_CLASS;
 
 final public class SelectFieldPane extends InputPaneBase {
 
@@ -26,7 +28,7 @@ final public class SelectFieldPane extends InputPaneBase {
     private final MultiOptionEditor multiOptionEditor;
     private final ReadOnlyObjectProperty<RawTypes> type;
 
-    public SelectFieldPane(String labelText, RawTypes rawType, MultiOptionEditor.FieldData data, boolean isDuplicate) {
+    public SelectFieldPane(String labelText, RawTypes rawType, FieldData data, boolean isDuplicate) {
         super();
         var label = new TextFieldChange(requireNonNullElse(labelText, ""));
         labelField = label;
@@ -38,13 +40,13 @@ final public class SelectFieldPane extends InputPaneBase {
         if (labelText == null || labelText.isBlank()) {
             isLabelValid = false;
             labelErr.setText(INVALID_LABEL_ERR);
-            label.pseudoClassStateChanged(ERR_CLASS, true);
+            label.pseudoClassStateChanged(ERROR_CLASS, true);
         }
         label.textProperty().addListener((observableValue, s, t1) -> {
             isLabelValid = !t1.isBlank();
             if (!isLabelDuplicate) {
                 labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                label.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+                label.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
             }
         });
 
@@ -52,6 +54,16 @@ final public class SelectFieldPane extends InputPaneBase {
         nameWrapper.setSpacing(5);
 
         var box = new ComboBox<>(observableArrayList(RawTypes.values()));
+        //allow rotating through values via arrow keys
+        box.setOnKeyPressed(keyEvent -> {
+            final var key = keyEvent.getCode();
+            if ((key == KeyCode.DOWN) || (key == KeyCode.UP)) {
+                final var model = box.getSelectionModel();
+                if (key == KeyCode.DOWN) model.selectNext(); else model.selectPrevious();
+                keyEvent.consume();
+            }
+
+        });
 
         if (rawType == null)
             box.getSelectionModel().selectFirst();
@@ -62,13 +74,6 @@ final public class SelectFieldPane extends InputPaneBase {
         typeWrapper.setSpacing(5);
 
         type = box.getSelectionModel().selectedItemProperty();
-
-        /*multiOptionEditor = new MultiOptionEditor(pairs,
-                20,
-                5,
-                label.widthProperty(),
-                box.getSelectionModel().selectedIndexProperty().isEqualTo(1),
-                box.getSelectionModel().selectedIndexProperty().isEqualTo(2));*/
 
         multiOptionEditor = new MultiOptionEditor(20,
                 5,
@@ -92,14 +97,23 @@ final public class SelectFieldPane extends InputPaneBase {
         return multiOptionEditor.containsError();
     }
 
+    public void setExecutor(ExecutorService executor) {
+        multiOptionEditor.setExecutor(executor);
+    }
+
+    public ExecutorService getExecutor() {
+        return multiOptionEditor.getExecutor();
+    }
+
     @Override
     public String generateHTML(int id) {
         final var labelText = getLabelText();
         if (type.get() == RawTypes.NUMBER) {
             final var fieldData = multiOptionEditor.getPairsAndData();
-            final var duplicates = fieldData.getDuplicates();
-            final var pairs = fieldData.getPairs();
-            final var nonNumerics = fieldData.getNonNumeric();
+
+            final var duplicates = fieldData.duplicates();
+            final var pairs = fieldData.pairs();
+            final var nonNumerics = fieldData.nonNumeric();
             final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates, nonNumerics);
             return PageGeneratorKt.genSelectInput(labelText, pairs, message);
         }
@@ -108,12 +122,6 @@ final public class SelectFieldPane extends InputPaneBase {
         final var pairs = fieldData.getPairs();
         final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates, Collections.emptyList());
         return PageGeneratorKt.genSelectInput(labelText, pairs, message);
-        /*final var duplicatesAndPairs = multiOptionEditor.newToArray();
-        final var duplicates = duplicatesAndPairs.getDuplicates();
-        final var pairs = duplicatesAndPairs.getPairs();
-        final var labelText = getLabelText();
-        final var message = PageGeneratorKt.genSelectErrMessage(isLabelDuplicate, labelText, duplicates);
-        return PageGeneratorKt.genSelectInput(labelText, pairs, message);*/
     }
 
 
@@ -128,9 +136,7 @@ final public class SelectFieldPane extends InputPaneBase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SelectFieldPane)) return false;
-
-        SelectFieldPane that = (SelectFieldPane) o;
+        if (!(o instanceof SelectFieldPane that)) return false;
 
         return multiOptionEditor.equals(that.multiOptionEditor);
     }

@@ -1,16 +1,25 @@
 package edu.opjms.main;
 
+import edu.opjms.controls.MFXStepper;
+import edu.opjms.controls.MFXStepperToggle;
 import edu.opjms.fileListPopup.FileListPopup;
+import edu.opjms.global.View;
 import edu.opjms.global.systemFolder.FolderProviderKt;
-import edu.opjms.templating.Templator;
+import edu.opjms.templating.TemplatorKt;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 
 import java.io.File;
+import java.util.List;
 
 public class Main extends Application {
 
@@ -31,16 +40,19 @@ public class Main extends Application {
 */
 
 //            primaryStage.setScene(scene);
+
+
         final var templateDataFolder = FolderProviderKt.getDataFolder().resolve("templates");
+        var templator = new TemplatorKt(getHostServices(), templateDataFolder);
+        var scene = new Scene(templator);
+        primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(windowEvent -> templator.cleanup());
 
-
-
-
-
-
-
-        Templator templator = new Templator(primaryStage, getHostServices(), templateDataFolder);
-//        var scene = new Scene(templator)
+        /*var list = List.of(new MFXStepperToggle("test", new Circle(5), new Label("Test")),
+                new MFXStepperToggle("test 2", new Rectangle(3, 4), new Label("test 2")));
+        var main = new MFXStepper(list);
+        var scene = new Scene(main);
+        primaryStage.setScene(scene);*/
 
 
        /* final int year = FolderProviderKt.getCurrentSession();
@@ -60,6 +72,8 @@ public class Main extends Application {
 
 //        new Thread(this::createFolder).start();
 
+        primaryStage.setWidth(800);
+        primaryStage.setHeight(600);
         primaryStage.show();
 
 

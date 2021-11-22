@@ -1,0 +1,45 @@
+.mfx-stepper-toggle .label {
+    -fx-background-color: transparent;
+    -fx-font-size: 14px;
+    -fx-text-fill: #BEBEBE;
+}
+
+.mfx-stepper-toggle {
+    -mfx-icon-color-selected: white;
+}
+
+.mfx-stepper-toggle #circle {
+    -fx-fill: #F8F8FF;
+    -fx-stroke: #F8F8FF;
+    -fx-stroke-width: 2px;
+}
+
+.mfx-stepper-toggle .mfx-font-icon {
+    -mfx-color: #000000;
+}
+
+.mfx-stepper-toggle:selected #circle {
+    -fx-fill: #F8F8FF;
+    -fx-stroke: #F8F8FF;
+}
+
+.mfx-stepper-toggle:selected .mfx-font-icon {
+    -mfx-color: white;
+}
+
+.mfx-stepper-toggle:selected .label {
+    -fx-text-fill: #F8F8FF;
+}
+
+.mfx-stepper-toggle:completed #circle {
+    -fx-fill: white;
+    -fx-stroke: #F8F8FF;
+}
+
+.mfx-stepper-toggle:completed .mfx-font-icon {
+    -fx-color: #BEBEBE;
+}
+
+.mfx-stepper-toggle:completed .mfx-label {
+    -mfx-text-fill: #BEBEBE;
+}

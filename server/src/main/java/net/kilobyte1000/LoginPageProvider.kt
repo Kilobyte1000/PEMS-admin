@@ -3,7 +3,6 @@ package net.kilobyte1000
 import java.nio.file.*
 import kotlin.io.path.*
 
-@OptIn(ExperimentalPathApi::class)
 fun loadLoginPageTest(inputs: String): Path {
     val html = StringBuilder(getResourceAsPath("/httpResources/html/loginPageSample.txt").readText())
 
@@ -35,7 +34,6 @@ fun loadLoginPageTest(inputs: String): Path {
     return htmlFile
 }
 
-@OptIn(ExperimentalPathApi::class)
 internal fun setLoginPage(inputs: String) {
     val html = StringBuilder(getResourceAsPath("/httpResources/html/loginPageSample.txt").readText())
 
@@ -48,6 +46,7 @@ internal fun setLoginPage(inputs: String) {
     getResourceAsPath("/httpResources/html/loginPage.html").writeText(html.toString())
 }
 
+@Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 private fun getResourceAsPath(resource: String)
     = Paths.get(WebApp::class.java.getResource(resource).toURI())
 

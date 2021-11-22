@@ -14,10 +14,11 @@ import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.GridPane
-import kotlinx.serialization.Serializable
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.BiConsumer
+
 typealias StringPair = Pair<String, String>
 
 class MultiOptionEditor(
@@ -35,11 +36,20 @@ class MultiOptionEditor(
 
     private val fieldMetadata = ArrayList<FieldMetadata>()
 
-    var executor: ExecutorService = Executors.newCachedThreadPool { Thread(it).apply { isDaemon = true } }
-    set(value) {
-        field.shutdown()
-        field = value
-    }
+    private var _executor: ExecutorService? = null
+
+    // lazy executor initialisation prevents from starting
+    // executors that are shutdown without doing anything
+    var executor: ExecutorService
+        get() {
+            return _executor ?: Executors.newCachedThreadPool { Thread(it).apply { isDaemon = true } }.also {
+                _executor = it
+                println("default executor init")
+            }
+        }
+        set(value) {
+            _executor = value
+        }
 
     private val isLastFieldEmpty = SimpleBooleanProperty(true)
 
@@ -58,8 +68,8 @@ class MultiOptionEditor(
                 val pair = pairs[i]
                 addField(pair.first, pair.second, bindEmptyFieldHandler = false)
                 fieldMetadata[i].apply {
-                    isDuplicate = pair.first.toLowerCase() in duplicates
-                    isNumeric = pair.second.toLowerCase() !in nonNumerics
+                    isDuplicate = pair.first.lowercase() in duplicates
+                    isNumeric = pair.second.lowercase() !in nonNumerics
                 }
                 updateErrorHints(i + 1)
             }
@@ -286,7 +296,7 @@ class MultiOptionEditor(
                 indices = searchString(string, visibleValueIterator(), rowCount - 1)
             }
         }
-        executor.submit(task)
+        executor.execute(task)
     }
 
     private fun getFirstIndexOfRow(rowIndex: Int): Int {
@@ -322,7 +332,7 @@ class MultiOptionEditor(
 
     private fun autoFill(textField: TextField, old: String, new: String) {
         if (doAutoFill.get() && textField.text.equals(old, true)) {
-            val text = new.toLowerCase()
+            val text = new.lowercase(Locale.getDefault())
             textField.text = text
             setNumeric(getRowIndex(textField), text)
         }
@@ -345,23 +355,9 @@ class MultiOptionEditor(
                 }
             }
         }
-
     }
 
     fun containsError() = duplicates != 0 || (doValidation.get() && nonNumerics != 0)
-
-    fun getPairs(): List<StringPair> {
-        //excluding first (header) and last (always empty)
-        var nodeIndex = getFirstIndexOfRow(1)
-        val children = childrenUnmodifiable
-        return List(rowCount - 2) {
-            val visibleField = children[nodeIndex] as TextField
-            val internalField = children[nodeIndex + 1] as TextField
-
-            nodeIndex += NODES_IN_EACH_ROW
-            visibleField.text to internalField.text
-        }
-    }
 
     fun getPairsAndDuplicates(): FieldsAndDuplicates {
         //excluding first (header) and last (always empty)
@@ -372,7 +368,7 @@ class MultiOptionEditor(
         val fields = List(rowCount - 2) {
             val visibleText = (children[nodeIndex] as TextField).text
             val internalText = (children[nodeIndex + 1] as TextField).text
-            val lowCaseVisibleText = visibleText.toLowerCase()
+            val lowCaseVisibleText = visibleText.lowercase()
 
             if (fieldMetadata[it].isDuplicate && lowCaseVisibleText !in duplicates) {
                 duplicates.add(lowCaseVisibleText)
@@ -395,7 +391,7 @@ class MultiOptionEditor(
         val fields = List(rowCount - 2) {
             val visibleText = (children[nodeIndex] as TextField).text
             val internalText = (children[nodeIndex + 1] as TextField).text
-            val lowCaseVisibleText = visibleText.toLowerCase()
+            val lowCaseVisibleText = visibleText.lowercase()
             val metadata = fieldMetadata[it]
 
             if (metadata.isDuplicate && lowCaseVisibleText !in duplicates) {
@@ -453,7 +449,8 @@ class MultiOptionEditor(
 
     private data class FieldMetadata(var isDuplicate: Boolean = false, var isNumeric: Boolean = true)
     data class FieldsAndDuplicates(val pairs: List<StringPair>, val duplicates: Set<String>)
-    @Serializable
-    data class FieldData(val pairs: List<StringPair>, val duplicates: Set<String>, val nonNumeric: Set<String>)
+
+//    @Serializable @JvmRecord
+//    data class FieldData(val pairs: List<StringPair>, val duplicates: Set<String>, val nonNumeric: Set<String>)
 
 }

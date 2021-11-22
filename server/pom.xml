@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.5.30</kotlin.version>
     </properties>
 
     <build>
@@ -28,7 +28,7 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
@@ -42,7 +42,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>14</jvmTarget>
+                    <jvmTarget>16</jvmTarget>
                     <args>
                         <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
                     </args>

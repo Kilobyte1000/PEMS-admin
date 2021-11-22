@@ -54,9 +54,9 @@
 }
 
 /*prevent blurry text*/
-.text-area > .scroll-pane {
-    -fx-padding: 0;
-}
+/*.text-area > .scroll-pane {*/
+/*    -fx-padding: 0;*/
+/*}*/
 
 /* shadow button test */
 .menu-button, .button {
@@ -123,4 +123,23 @@
 .titled-pane:focused > .title > .arrow-button > .arrow {
     -fx-border-color: #7a7a7a;
     -fx-border-width: 1;
+}
+
+/* Pop Over */
+
+.heading {
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 1.2em;
+}
+.pop-body {
+    -fx-font-size: 1.3em;
+}
+.popover {
+    -fx-padding: .5em .4em;
+    -fx-effect: none;
+}
+.popover > .border {
+    -fx-fill: #f9f9f9 !important;
+    -fx-stroke: #bfbfbf !important;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,.2), 10.0, .1, 0.0, 2.0) !important;
 }

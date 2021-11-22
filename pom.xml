@@ -10,9 +10,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
-        <kotlin.version>1.4.21</kotlin.version>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
+        <kotlin.version>1.5.31</kotlin.version>
         <serialization.version>1.1.0</serialization.version>
     </properties>
 
@@ -41,12 +41,15 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <compilerPlugins>
+                    <!--<compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
-                    </compilerPlugins>
+                    </compilerPlugins>-->
                     <args>
                         <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
+                        <arg>-Xlambdas=indy</arg>
                     </args>
+                    <languageVersion>1.5</languageVersion>
+                    <jvmTarget>${maven.compiler.target}</jvmTarget>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -81,30 +84,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
-                <!--<executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>default-testCompile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>testCompile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>-->
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -122,30 +101,38 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <release>14</release>
-                    <source>14</source>
-                    <target>14</target>
+                    <release>16</release>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
+<!--
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+-->
 
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>14</version>
+            <version>16</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>14</version>
+            <version>16</version>
         </dependency>
         <dependency>
             <groupId>org.jfxtras</groupId>
             <artifactId>jmetro</artifactId>
-            <version>11.6.12</version>
+            <version>11.6.15</version>
         </dependency>
         <dependency>
             <groupId>com.jfoenix</groupId>
@@ -168,22 +155,22 @@
             <artifactId>commons-text</artifactId>
             <version>1.9</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-json</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.2</version>
             <type>pom</type>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.0.0</version>
+            <version>11.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>0.15.1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>ch.vorburger.mariaDB4j</groupId>
@@ -194,8 +181,9 @@
             <groupId>net.kilobyte1000</groupId>
             <artifactId>server</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+<!--            <scope>compile</scope>-->
         </dependency>
+
     </dependencies>
 
 

@@ -1,14 +1,17 @@
 package edu.opjms.templating.inputPanes;
 
+import edu.opjms.global.CommonKt;
 import edu.opjms.global.inputForms.PageGeneratorKt;
 import edu.opjms.global.inputForms.RawTextFieldInput;
 import edu.opjms.templating.RawTypes;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
+import kotlin.Pair;
 
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
@@ -16,6 +19,7 @@ import java.util.regex.PatternSyntaxException;
 
 import static java.util.Objects.requireNonNullElse;
 import static javafx.collections.FXCollections.observableArrayList;
+import static edu.opjms.global.CommonKt.ERROR_CLASS;
 
 
 final public class TextFieldPane extends InputPaneBase {
@@ -28,7 +32,7 @@ final public class TextFieldPane extends InputPaneBase {
     private final ReadOnlyObjectProperty<RawTypes> selectedTypeProperty;
     private final StringProperty regexProperty;
     private final StringProperty tooltipProperty;
-    private final boolean isUniqueField;
+    public final boolean isUniqueField;
 
     public TextFieldPane() {
         this(null, null, null, null, null, false);
@@ -47,26 +51,10 @@ final public class TextFieldPane extends InputPaneBase {
         super();
 
         this.isUniqueField = isUniqueField;
+        Pair<TextField, Label> pair = getLabelInput(labelText);
 
         //Label Text
-        var label = new TextFieldChange(requireNonNullElse(labelText, ""));
-        super.labelField = label;
-        var labelErr = new Label();
-        super.labelErr = labelErr;
-        labelErr.getStyleClass().add("err");
-        if (labelText == null || labelText.isBlank()) {
-            isLabelValid = false;
-            label.pseudoClassStateChanged(ERR_CLASS, true);
-            labelErr.setText(INVALID_LABEL_ERR);
-        }
-        label.textProperty().addListener((observableValue, s, newVal) -> {
-            isLabelValid = !newVal.isBlank();
-            if (!isLabelDuplicate) {
-                labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                label.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
-            }
-        });
-        VBox nameWrapper = wrapInVBox(new Label("Label Text"), label, labelErr);
+        VBox nameWrapper = wrapInVBox(new Label("Label Text"), pair.component1(), pair.component2());
 
 
         //placeholder
@@ -76,16 +64,16 @@ final public class TextFieldPane extends InputPaneBase {
         placeholderErr.setText("placeholder must be set");
         //error handling
         final var isPlaceholderInvalid = placeholderText == null || placeholderText.isBlank();
-        placeholderField.pseudoClassStateChanged(ERR_CLASS, isPlaceholderInvalid);
-        labelErr.setVisible(isPlaceholderInvalid);
-        labelErr.setManaged(isPlaceholderInvalid);
+        placeholderField.pseudoClassStateChanged(ERROR_CLASS, isPlaceholderInvalid);
+        placeholderErr.setVisible(isPlaceholderInvalid);
+        placeholderErr.setManaged(isPlaceholderInvalid);
         //listener
         placeholderField.textProperty()
                 .addListener((observableValue, s, newVal) -> {
                     final var isBlank = newVal.isBlank();
                     placeholderErr.setVisible(isBlank);
                     placeholderErr.setManaged(isBlank);
-                    placeholderField.pseudoClassStateChanged(ERR_CLASS, isBlank);
+                    placeholderField.pseudoClassStateChanged(ERROR_CLASS, isBlank);
                 });
         VBox placeholderWrapper = wrapInVBox(new Label("Placeholder"), placeholderField, placeholderErr);
         placeholderTextProperty = placeholderField.textProperty();
@@ -98,15 +86,24 @@ final public class TextFieldPane extends InputPaneBase {
         typeErr.setText("type must be set");
         //error handling
         final var isTypeNull = rawType == null;
-        box.pseudoClassStateChanged(ERR_CLASS, isTypeNull);
+        box.pseudoClassStateChanged(ERROR_CLASS, isTypeNull);
         typeErr.setManaged(isTypeNull);
         typeErr.setVisible(isTypeNull);
         //listener
+        box.setOnKeyPressed(keyEvent -> {
+            final var key = keyEvent.getCode();
+            if ((key == KeyCode.DOWN) || (key == KeyCode.UP)) {
+                final var model = box.getSelectionModel();
+                if (key == KeyCode.DOWN) model.selectNext(); else model.selectPrevious();
+                keyEvent.consume();
+            }
+
+        });
         box.getSelectionModel().selectedItemProperty().addListener((observableValue, rawTypes, t1) -> {
             var isNull = t1 == null;
             typeErr.setVisible(isNull);
             typeErr.setManaged(isNull);
-            box.pseudoClassStateChanged(ERR_CLASS, isNull);
+            box.pseudoClassStateChanged(ERROR_CLASS, isNull);
         });
         VBox typeWrapper = wrapInVBox(new Label("Type"), box, typeErr);
         selectedTypeProperty = box.getSelectionModel().selectedItemProperty();
@@ -149,9 +146,6 @@ final public class TextFieldPane extends InputPaneBase {
 
         //tooltip
         Label tooltipLabel = new Label("Tooltip (Optional)");
-        Tooltip tooltip = new Tooltip("A tooltip is a popup text (like this one) useful for giving explanation.\nIf you are using regex, then the tooltip should define how the text should be formatted");
-
-        tooltipLabel.setTooltip(tooltip);
         var tooltipTextArea = new TextArea(requireNonNullElse(tooltipText, ""));
         tooltipProperty = tooltipTextArea.textProperty();
 
@@ -184,7 +178,7 @@ final public class TextFieldPane extends InputPaneBase {
         else if (regex != null)
             box.getSelectionModel().select(1);
 
-        configureSuper(label.textProperty(), isUniqueField? UNIQUE_SUFFIX: SUFFIX);
+        configureSuper(pair.component1().textProperty(), isUniqueField? UNIQUE_SUFFIX: SUFFIX);
 
         /*this.focusedProperty().addListener((observableValue, aBoolean, t1) -> {
             if (isFocused()) hideErrHints();
@@ -200,10 +194,10 @@ final public class TextFieldPane extends InputPaneBase {
         if (isLabelDuplicate != value) {
             if (value) {
                 labelErr.setText(DUPLICATE_ERR);
-                labelField.pseudoClassStateChanged(ERR_CLASS, true);
+                labelField.pseudoClassStateChanged(ERROR_CLASS, true);
             } else {
                 labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                labelField.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+                labelField.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
             }
             isLabelDuplicate = value;
         }

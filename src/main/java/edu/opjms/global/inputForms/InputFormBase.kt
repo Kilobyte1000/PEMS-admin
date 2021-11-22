@@ -2,17 +2,16 @@ package edu.opjms.global.inputForms
 
 import edu.opjms.templating.RawTypes
 import edu.opjms.templating.inputPanes.*
-import kotlinx.serialization.Serializable
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 
-interface RawInputFormBase{
+sealed interface RawInputFormBase: java.io.Serializable {
     fun toInputPane(): InputPaneBase
     fun genHtml(): String
 }
 
-@Serializable
+@JvmRecord
 data class RawTextFieldInput(
         val labelText: String,
         val placeholderText: String,
@@ -47,31 +46,13 @@ data class RawTextFieldInput(
         )
         return genTextInput(labelText, placeholderText, rawType, regex, tooltipText, message)
     }
-
-/*    override fun writeExternal(out: ObjectOutput) {
-        with(out) {
-            writeUTF(labelText)
-            writeUTF(placeholderText)
-            writeObject(rawType)
-            writeUTF(regex)
-            writeUTF(tooltipText)
-            writeBoolean(isUniqueField)
-            writeBoolean(isDuplicate)
-        }
-    }
-
-    override fun readExternal(input: ObjectInput) {
-        with(input) {
-            labelText = readUTF()
-        }
-    }*/
 }
 
-@Serializable
+@JvmRecord
 data class RawSelectField(
         val labelText: String,
         val rawType: RawTypes,
-        val fieldData: MultiOptionEditor.FieldData,
+        val fieldData: FieldData,
         val isDuplicate: Boolean
 ): RawInputFormBase {
     override fun toInputPane() = SelectFieldPane(labelText, rawType, fieldData, isDuplicate)
@@ -79,14 +60,14 @@ data class RawSelectField(
         val message = genSelectErrMessage(
                 isDuplicate,
                 labelText,
-                fieldData.duplicates,
-                if (rawType == RawTypes.NUMBER) fieldData.nonNumeric else emptyList()
+                fieldData.duplicates(),
+                if (rawType == RawTypes.NUMBER) fieldData.nonNumeric() else emptyList()
         )
-        return genSelectInput(labelText, fieldData.pairs, message)
+        return genSelectInput(labelText, fieldData.pairs(), message)
     }
 }
 
-@Serializable
+@JvmRecord
 data class RawDateInput(val labelText: String, val isDuplicate: Boolean): RawInputFormBase {
     override fun toInputPane() =
             DateInputPane(labelText).apply { showDuplicateError(isDuplicate) }
@@ -97,6 +78,7 @@ data class RawDateInput(val labelText: String, val isDuplicate: Boolean): RawInp
     }
 }
 
+@JvmRecord
 data class RawBooleanField(val labelText: String, val trueLabel: String, val falseLabel: String, val isDuplicate: Boolean): RawInputFormBase {
     override fun genHtml(): String {
         return genBooleanInput(isDuplicate, labelText, trueLabel, falseLabel)

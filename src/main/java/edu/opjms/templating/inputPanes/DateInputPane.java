@@ -7,10 +7,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import jfxtras.styles.jmetro.JMetroStyleClass;
-
 import java.util.Objects;
 
-import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
+import static edu.opjms.global.CommonKt.ERROR_CLASS;
 
 final public class DateInputPane extends InputPaneBase {
 
@@ -32,13 +31,13 @@ final public class DateInputPane extends InputPaneBase {
         if (label == null || label.isBlank()) {
             isLabelValid = false;
             labelErr.setText(INVALID_LABEL_ERR);
-            labelInput.pseudoClassStateChanged(ERR_CLASS, true);
+            labelInput.pseudoClassStateChanged(ERROR_CLASS, true);
         }
         labelInput.textProperty().addListener((observableValue, s, t1) -> {
             isLabelValid = !t1.isBlank();
             if (!isLabelDuplicate) {
                 labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                labelInput.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+                labelInput.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
             }
         });
 

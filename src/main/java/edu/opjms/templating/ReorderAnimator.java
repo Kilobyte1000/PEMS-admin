@@ -1,6 +1,8 @@
 package edu.opjms.templating;
 
+import javafx.animation.Interpolator;
 import javafx.animation.Transition;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +26,8 @@ import java.util.WeakHashMap;
  */
 public class ReorderAnimator implements ChangeListener<Number>, ListChangeListener<Node> {
 
-    private final Map<Node, MoveYTransition> nodeYTransitions = new WeakHashMap<>();
+//    private final Map<Node, MoveYTransition> nodeYTransitions = new WeakHashMap<>();
+    private final Map<Node, TranslateTransition> nodeYTransitions = new WeakHashMap<>();
     private boolean animateNextChange = false;
 
     /**
@@ -63,29 +66,37 @@ public class ReorderAnimator implements ChangeListener<Number>, ListChangeListen
     @Override
     public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
         if (animateNextChange) {
-            final double delta = newValue.doubleValue() - oldValue.doubleValue();
+            final double delta = oldValue.doubleValue() - newValue.doubleValue();
             final DoubleProperty doubleProperty = (DoubleProperty) ov;
             final Node node = (Node) doubleProperty.getBean();
 
             node.setCacheHint(CacheHint.SPEED);
 
-            MoveYTransition ty = nodeYTransitions.get(node);
+            var ty = nodeYTransitions.get(node);
+//            MoveYTransition ty = nodeYTransitions.get(node);
             if (ty == null) {
-                ty = new MoveYTransition(node);
+//                ty = new MoveYTransition(node);
+                ty = new TranslateTransition();
+                ty.setNode(node);
+                ty.setToY(0);
+                ty.setDuration(Duration.millis(200));
                 nodeYTransitions.put(node, ty);
             }
-            ty.setFromY(ty.getTranslateY() - delta);
+//            ty.setFromY(ty.getTranslateY() - delta);
+            ty.setFromY(delta);
+//            ty.setFromY(ty.getTranslateY() - delta);
 
             ty.setOnFinished(event -> {
                 animateNextChange = false;
-                node.setCacheHint(CacheHint.QUALITY);
+                node.setCacheHint(CacheHint.DEFAULT);
             });
             ty.playFromStart();
+
 
         }
     }
 
-    private abstract static class MoveTransition extends Transition {
+/*    private abstract static class MoveTransition extends Transition {
 
         protected final Translate translate;
 
@@ -111,14 +122,16 @@ public class ReorderAnimator implements ChangeListener<Number>, ListChangeListen
         }
 
         @Override protected void interpolate(double frac) {
+            getInterpolator().interpolate()
             translate.setY(fromY * (1 - frac));
         }
 
         public void setFromY(double fromY) {
+
             translate.setY(fromY);
             this.fromY = fromY;
         }
-    }
+    }*/
 
     @Override
     public void onChanged(Change change) {

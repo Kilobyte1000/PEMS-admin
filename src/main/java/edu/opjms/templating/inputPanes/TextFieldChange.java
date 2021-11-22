@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 class TextFieldChange extends TextField {
     private String oldText = null;
     private BiConsumer<String, String> onTextChange = null;
+    private boolean fireOnNextFocusLost = false;
 
     private void addListener() {
         focusedProperty().addListener((observableValue, aBoolean, t1) -> {
@@ -15,9 +16,10 @@ class TextFieldChange extends TextField {
             } else {
                 var text = getText().strip();
                 setText(text);
-                if (!text.equals(oldText) && onTextChange != null) {
+                if (fireOnNextFocusLost || (!text.equals(oldText) && onTextChange != null)) {
                     onTextChange.accept(oldText, text);
                     oldText = null;
+                    fireOnNextFocusLost = false;
                 }
             }
         });
@@ -39,5 +41,13 @@ class TextFieldChange extends TextField {
 
     public BiConsumer<String, String> getOnTextChange() {
         return onTextChange;
+    }
+
+    public boolean isFireOnNextFocusLost() {
+        return fireOnNextFocusLost;
+    }
+
+    public void setFireOnNextFocusLost(boolean fireOnNextFocusLost) {
+        this.fireOnNextFocusLost = fireOnNextFocusLost;
     }
 }

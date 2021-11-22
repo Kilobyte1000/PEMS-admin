@@ -22,17 +22,33 @@
 
 /* ds delete button */
 
-.inner-title Button:hover {
+.inner-title > Button.delete:hover {
     -fx-background-color: #400606, #b83030;
     -fx-background-insets: 0, 2;
 }
 
-.inner-title SVGPath {
+.inner-title > Button.move:hover {
+    -fx-background-color: #082442, #155293;
+    -fx-background-insets: 0, 2;
+}
+
+.inner-title > Button.delete > SVGPath {
     -fx-fill: #ca403f;
 }
 
-.inner-title Button:hover SVGPath {
+.inner-title > Button.move > SVGPath {
+    /*-fx-fill: #235baf;*/
+    -fx-fill: #103f85;
+    /*-fx-fill: #212121;*/
+}
+
+.inner-title > Button.delete:hover > SVGPath {
     -fx-fill: #d6d6d6;
+}
+
+.inner-title > Button.move:hover > SVGPath {
+    -fx-fill: #d6d6d6;
+    /*-fx-fill: #103873;*/
 }
 
 .tooltip {

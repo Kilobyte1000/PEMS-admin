@@ -1,51 +1,42 @@
 package edu.opjms.templating.inputPanes;
 
+import edu.opjms.global.CommonKt;
 import edu.opjms.global.inputForms.RawInputFormBase;
 import edu.opjms.templating.ReorderAnimator;
 import edu.opjms.templating.controls.Snackbar;
-import javafx.animation.*;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
-import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.ClipboardContent;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.SVGPath;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
+import kotlin.Pair;
 
 import java.util.function.BiConsumer;
+import java.util.function.IntConsumer;
+
+import static edu.opjms.global.CommonKt.ERROR_CLASS;
+import static java.util.Objects.requireNonNullElse;
 
 public abstract class InputPaneBase extends TitledPane {
 
     private StringProperty labelTextProperty;
     private static final ReorderAnimator reorderAnimator = new ReorderAnimator();
     private String suffix;
-    private boolean isDeletable = false;
+    private boolean hasControls = false;
 
 
     private Snackbar snackbar = null;
 
     private static final String DUPLICATE_ERR = "The label is Duplicated";
     protected static final String INVALID_LABEL_ERR = "Label must be set";
-    protected final static PseudoClass ERR_CLASS = PseudoClass.getPseudoClass("error");
+//    protected final static PseudoClass ERR_CLASS = PseudoClass.getPseudoClass("error");
 
     protected boolean isLabelDuplicate = false;
     protected boolean isLabelValid = true;
@@ -54,23 +45,38 @@ public abstract class InputPaneBase extends TitledPane {
     protected TextFieldChange labelField;
     protected Label labelErr;
 
+    protected Pair<TextField, Label> getLabelInput(String labelText) {
+        labelField = new TextFieldChange(requireNonNullElse(labelText, ""));
+
+        var labelErr = new Label();
+        labelErr.getStyleClass().add(CommonKt.ERROR_STYLECLASS);
+
+        if (labelText == null || labelText.isBlank()) {
+            isLabelValid = false;
+            labelField.pseudoClassStateChanged(ERROR_CLASS, true);
+            labelErr.setText(INVALID_LABEL_ERR);
+        }
+
+        labelField.textProperty().addListener((observableValue, s, newVal) -> {
+            isLabelValid = !newVal.isBlank();
+            if (!isLabelDuplicate) {
+                labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
+                labelField.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
+            }
+        });
+
+        return new Pair<>(labelField, labelErr);
+    }
+
     public InputPaneBase() {
         //all the shortcut keys are added here
         this.setOnKeyPressed(keyEvent -> {
-
             final var keyCode = keyEvent.getCode();
             //opening and close convenience
             if (keyCode == KeyCode.LEFT)
                 super.setExpanded(false);
             else if (keyCode == KeyCode.RIGHT)
                 super.setExpanded(true);
-
-            //shortcut keys
-            if (keyEvent.isShortcutDown()) {
-                if (keyCode == KeyCode.DELETE && isDeletable)
-                    deleteThis(null);
-
-            }
         });
     }
 
@@ -101,143 +107,138 @@ public abstract class InputPaneBase extends TitledPane {
         if (val != isLabelDuplicate) {
             if (val) {
                 labelErr.setText(DUPLICATE_ERR);
-                labelField.pseudoClassStateChanged(ERR_CLASS, true);
+                labelField.pseudoClassStateChanged(ERROR_CLASS, true);
             } else {
                 labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                labelField.pseudoClassStateChanged(ERR_CLASS, !isLabelValid);
+                labelField.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
             }
             isLabelDuplicate = val;
         }
     }
 
 
-
-    /**
-     * Public method to allow re-ordering of InputPanes with other panes
-     * by drag and drop
-     */
-    public void allowDND() {
-        if (getSkin() == null) {
-            skinProperty().addListener(observable -> configureDND());
-        } else
-            configureDND();
-    }
-
-
-    /**
-     * Adds a delete button to the end of the title pane
-     * which allows deleting the input pane via clicking it
-     */
-    public void setDeletable() {
+    public void addControlButtons(EventHandler<ActionEvent> evt, IntConsumer offset) {
         if (getSkin() == null) {
             skinProperty().addListener(observable -> {
-                addDeleteButton();
-                isDeletable = true;
+                addControlButtonsImpl(evt, offset);
+                hasControls = true;
             });
         } else {
-            addDeleteButton();
-            isDeletable = true;
+            addControlButtonsImpl(evt, offset);
+            hasControls = true;
         }
     }
 
-    final protected void addDeleteButton() {
+    private void addControlButtonsImpl(EventHandler<ActionEvent> evt, IntConsumer offset) {
         textProperty().unbind();
         textProperty().setValue("");
 
-
-        var currentTitle = lookup(".title");
+        final var currentTitle = lookup(".title");
         currentTitle.setOnMouseClicked(currentTitle.getOnMouseReleased());
         currentTitle.setOnMouseReleased(null);
 
-        StackPane title = new StackPane();
+        final var title = new HBox();
 
         title.getStyleClass().add("inner-title");
+        title.setSpacing(5);
+        title.setAlignment(Pos.CENTER_LEFT);
         title.minWidthProperty().bind(widthProperty().subtract(50));
         title.setMaxHeight(Region.USE_COMPUTED_SIZE);
 
-        var deleteTooltip = new Tooltip("Delete");
-            var shortcutText = new Text(new KeyCodeCombination(KeyCode.DELETE, KeyCombination.SHORTCUT_DOWN).getDisplayText());
+        final var titleLabel = new Label();
+        titleLabel.textProperty().bind(labelTextProperty.concat(suffix));
+        final var isVisible = currentTitle.hoverProperty().or(this.focusedProperty());
+
+        final var deleteButton = getDeleteButton(evt, isVisible);
+        final var moveUpButton = getMoveUpButton(offset, isVisible);
+        final var moveDownButton = getMoveDownButton(offset, isVisible);
+
+        final var spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        title.getChildren().addAll(titleLabel, spacer, moveUpButton, moveDownButton, deleteButton);
+
+        this.setOnKeyPressed(keyEvent -> {
+            final var keyCode = keyEvent.getCode();
+            //opening and close convenience
+            if (keyCode == KeyCode.LEFT)
+                super.setExpanded(false);
+            else if (keyCode == KeyCode.RIGHT)
+                super.setExpanded(true);
+
+            //shortcut keys
+            if (keyEvent.isShortcutDown()) {
+                switch (keyCode) {
+                    case DELETE -> deleteButton.fire();
+                    case UP -> offset.accept(-1);
+                    case DOWN -> offset.accept(1);
+                }
+            }
+        });
+        setGraphic(title);
+
+    }
+
+    private Button getDeleteButton(EventHandler<ActionEvent> evt, BooleanBinding isVisible) {
+        var shortcutText = new Text(new KeyCodeCombination(KeyCode.DELETE, KeyCombination.SHORTCUT_DOWN).getDisplayText());
         shortcutText.getStyleClass().add("shortcut");
+        var deleteTooltip = new Tooltip("Delete");
         deleteTooltip.setGraphic(shortcutText);
         deleteTooltip.setContentDisplay(ContentDisplay.RIGHT);
 
-        Button deleteButton = new Button();
+        final var graphic = CommonKt.getDeleteIcon();
+        graphic.getStyleClass().add("delete");
+        Button deleteButton = new Button("", graphic);
         deleteButton.setTooltip(deleteTooltip);
         deleteButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        deleteButton.getStyleClass().clear();
-        Label titleLabel = new Label();
-        titleLabel.textProperty().bind(labelTextProperty.concat(suffix));
+        deleteButton.getStyleClass().setAll("delete");
+        deleteButton.visibleProperty().bind(isVisible);
 
-        var deleteIcon = new SVGPath();
-        deleteIcon.setContent("M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z");
-        deleteButton.setGraphic(deleteIcon);
-        deleteButton.visibleProperty().bind(currentTitle.hoverProperty().or(this.focusedProperty()));
+        deleteButton.setOnAction(evt);
+        return deleteButton;
+    }
 
-        deleteButton.setOnAction(this::deleteThis);
+    private Button getMoveUpButton(IntConsumer fun, BooleanBinding isVisible) {
+        var shortcutText = new Text(new KeyCodeCombination(KeyCode.UP, KeyCombination.SHORTCUT_DOWN).getDisplayText());
+        shortcutText.getStyleClass().add("shortcut");
+        var deleteTooltip = new Tooltip("Move up");
+        deleteTooltip.setGraphic(shortcutText);
+        deleteTooltip.setContentDisplay(ContentDisplay.RIGHT);
 
-        StackPane.setAlignment(titleLabel, Pos.CENTER_LEFT);
-        StackPane.setAlignment(deleteButton, Pos.CENTER_RIGHT);
+        final var graphic = CommonKt.getArrowUp24();
+        graphic.getStyleClass().add("move");
+        Button moveUp = new Button("", graphic);
+        moveUp.setTooltip(deleteTooltip);
+        moveUp.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        moveUp.getStyleClass().setAll("move");
+        moveUp.visibleProperty().bind(isVisible);
 
-        title.getChildren().addAll(titleLabel, deleteButton);
+        moveUp.setOnAction(actionEvent -> fun.accept(-1));
+        return moveUp;
+    }
+    private Button getMoveDownButton(IntConsumer fun, BooleanBinding isVisible) {
+        var shortcutText = new Text(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.SHORTCUT_DOWN).getDisplayText());
+        shortcutText.getStyleClass().add("shortcut");
+        var deleteTooltip = new Tooltip("Move Down");
+        deleteTooltip.setGraphic(shortcutText);
+        deleteTooltip.setContentDisplay(ContentDisplay.RIGHT);
 
-        setGraphic(title);
+        final var graphic = CommonKt.getArrowDown24();
+        graphic.getStyleClass().add("move");
+        Button moveDown = new Button("", graphic);
+        moveDown.setTooltip(deleteTooltip);
+        moveDown.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        moveDown.getStyleClass().clear();
+        moveDown.getStyleClass().setAll("move");
+        moveDown.visibleProperty().bind(isVisible);
+
+        moveDown.setOnAction(actionEvent -> fun.accept(1));
+        return moveDown;
     }
 
 
-    final protected void configureDND() {
-        var title = this.lookup(".title");
-        var root = (Pane) this.getParent();
-        title.setOnMouseDragged(detectDrag);
-        title.setOnDragDetected(mouseEvent -> {
-            var db = this.startDragAndDrop(TransferMode.MOVE);
-
-            db.setDragView(this.snapshot(null, null), mouseEvent.getX(), mouseEvent.getY());
-            ClipboardContent content = new ClipboardContent();
-
-            final int index = root.getChildrenUnmodifiable().indexOf(this);
-
-            content.putString(String.valueOf(index));
-
-            db.setContent(content);
-            mouseEvent.consume();
-        });
-
-        this.setOnDragOver(dragEvent -> {
-            if (dragEvent.getGestureSource() != this && dragEvent.getDragboard().hasString())
-                dragEvent.acceptTransferModes(TransferMode.MOVE);
-            dragEvent.consume();
-        });
 
 
-        this.setOnDragEntered(dragEvent -> {
-            if (dragEvent.getDragboard().hasString() && dragEvent.getGestureSource() != this) {
-                this.setStyle("-fx-background-color: #ebebeb");
-                this.getContent().setStyle("-fx-background-color: #ebebeb");
-            }
-            dragEvent.consume();
-        });
-
-        this.setOnDragExited(dragEvent -> {
-            this.setStyle("");
-            this.getContent().setStyle("");
-        });
-
-        this.setOnDragDropped(dragEvent -> {
-            var db = dragEvent.getDragboard();
-            if (db.hasString() && dragEvent.getGestureSource() != null) {
-                reorderAnimator.animateNextChange();
-
-                int sourceIndex = Integer.parseInt(db.getString());
-                int targetIndex = root.getChildrenUnmodifiable().indexOf(this);
-                Node sourceNode = root.getChildren().remove(sourceIndex);
-
-                root.getChildren().add(targetIndex, sourceNode);
-
-            }
-            dragEvent.setDropCompleted(true);
-            dragEvent.consume();
-        });
-    }
 
     final protected void configureSuper(StringProperty labelTextProperty, String suffix) {
         if (this.labelTextProperty == null) {
@@ -282,82 +283,6 @@ public abstract class InputPaneBase extends TitledPane {
 //    }
     public String getLabelText() {return  labelTextProperty.getValue();}
 
-    private void deleteThis(ActionEvent actionEvent) {
-        var parent = getParent();
-        //remove titled Pane from Parent
-
-
-        var anim = getExitAnim();
-
-        anim.setOnFinished(event -> {
-            int index;
-
-            if (parent instanceof Accordion) {
-                var accordion = (Accordion) parent;
-                index = accordion.getPanes().indexOf(this);
-                accordion.getPanes().remove(index);
-            } else {
-                var pane = (Pane) parent;
-                index = pane.getChildren().indexOf(this);
-                pane.getChildren().remove(index);
-            }
-
-            labelField.getOnTextChange().accept(labelField.getText(), null);
-
-            if (snackbar != null) {
-                var label = getLabelText() + suffix;
-                snackbar.enque(new Snackbar.SnackBarEvent(label + " was deleted", aVoid -> {
-                    if (parent instanceof Accordion)
-                        ((Accordion) parent).getPanes().add(index, this);
-                    else
-                        ((Pane) parent).getChildren().add(index, this);
-                    anim.play();
-                    callScan();
-                }));
-            }
-            anim.setOnFinished(null);
-            anim.setRate(-1);
-        });
-        anim.playFromStart();
-
-        callScan();
-    }
-
-    protected void callScan() {
-        labelField.getOnTextChange().accept(getLabelText(), null);
-    }
-
-    private Timeline getExitAnim() {
-        var interpolator = Interpolator.SPLINE(.52,.16,.97,.84);
-        return new Timeline(
-                new KeyFrame(
-                        Duration.ZERO,
-                        new KeyValue(this.opacityProperty(), 1),
-                        new KeyValue(this.scaleYProperty(), 1),
-                        new KeyValue(this.translateXProperty(), 0)
-                ),
-                new KeyFrame(
-                        Duration.millis(400),
-                        new KeyValue(this.opacityProperty(), .4, interpolator),
-                        new KeyValue(this.scaleYProperty(), .5, interpolator),
-                        new KeyValue(this.translateXProperty(), getParent().getLayoutBounds().getWidth() * 2, interpolator)
-                )
-        );
-    }
-
-    /*
-
-        Static Action Events.
-
-     */
-
-    private static final EventHandler<MouseEvent> detectDrag = mouseEvent -> mouseEvent.setDragDetect(true);
-
-
-    /*
-    *
-    *
-    * */
 
     abstract public RawInputFormBase toRawInput();
 

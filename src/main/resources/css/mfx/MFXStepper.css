@@ -1,0 +1,36 @@
+.mfx-stepper .buttons-box .button {
+    -fx-background-color: white;
+    -fx-border-color: #445055;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-font-size: 13;
+}
+
+mfx-stepper {
+    -mfx-base-color: #7F0FFF;
+    -mfx-alt-color: #BEBEBE;
+    -mfx-bar-background: #F8F8FF;
+    -mfx-charcoal: #445055;
+    -mfx-progress-color: -mfx-base-color;
+}
+
+.mfx-stepper .track {
+    -fx-fill: #F8F8FF;
+}
+
+.mfx-stepper .bar {
+    -fx-fill: #7F0FFF;
+}
+
+.mfx-stepper .buttons-box .button .text {
+    -fx-fill: #445055;
+}
+
+.mfx-stepper .buttons-box .button:focused {
+    -fx-background-color: #7F0FFF;
+    -fx-border-color: #7F0FFF;
+}
+
+.mfx-stepper .buttons-box .button:focused .text {
+    -fx-fill: white;
+}

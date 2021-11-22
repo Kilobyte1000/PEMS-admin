@@ -5,7 +5,7 @@ package edu.opjms.csvParser
 import org.apache.commons.lang3.StringUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -220,7 +220,7 @@ class EnumColumnBuilder(name: String) : ColumnBuilder(name) {
     val options = mutableListOf<String>()
 
     override fun evaluate(input: String): String? {
-        val value = input.toLowerCase()
+        val value = input.lowercase(Locale.getDefault())
         if (value !in options)
             options.add(value)
         return null

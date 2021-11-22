@@ -1,11 +1,11 @@
 package edu.opjms.templating.inputPanes
 
+import edu.opjms.global.ERROR_CLASS
 import edu.opjms.global.inputForms.RawBooleanField
 import edu.opjms.global.inputForms.RawInputFormBase
 import edu.opjms.global.inputForms.genBooleanInput
 import javafx.beans.property.StringProperty
 import javafx.scene.control.Label
-import javafx.scene.control.TextField
 
 class BooleanFieldPane(
         label: String = "",
@@ -23,36 +23,58 @@ class BooleanFieldPane(
         if (label.isBlank()) {
             isLabelValid = false
             labelErr.text = INVALID_LABEL_ERR
-            labelInput.pseudoClassStateChanged(ERR_CLASS, true)
+            labelInput.pseudoClassStateChanged(ERROR_CLASS, true)
         }
         labelInput.textProperty().addListener { _, _, new ->
             isLabelValid = new.isNotBlank()
             if (!isLabelDuplicate) {
                 labelErr.text = if (isLabelValid) "" else INVALID_LABEL_ERR
-                labelInput.pseudoClassStateChanged(ERR_CLASS, !isLabelValid)
+                labelInput.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid)
             }
         }
 
-        val trueInput = TextFieldChange(trueLabel)
+        val trueInput = ValidatedTextField(trueLabel)
         trueText = trueInput.textProperty()
         val trueErrLabel = Label().apply {
-            isVisible = false
             isWrapText = true
-            styleClass.add("err")
             maxWidthProperty().bind(trueInput.widthProperty())
         }
 
-        val falseInput = TextFieldChange(falseLabel)
+        val falseInput = ValidatedTextField(falseLabel)
         falseText = falseInput.textProperty()
         val falseErrLabel = Label().apply {
-            isVisible = false
             isWrapText = true
-            styleClass.add("err")
             maxWidthProperty().bind(falseInput.widthProperty())
         }
 
-        trueInput.textProperty().addListener { _, _, _ -> updateErrHints(trueInput, trueErrLabel, falseInput, falseErrLabel) }
-        falseInput.textProperty().addListener { _, _, _ -> updateErrHints(trueInput, trueErrLabel, falseInput, falseErrLabel) }
+
+
+        trueInput.nonBlankValidation(trueErrLabel, TRUE_BLANK) {
+            if (it.newValue.equals(falseInput.text, true)) {
+                falseInput.setError(SAME_ERROR)
+                SAME_ERROR
+            } else
+                null
+        }
+
+        falseInput.nonBlankValidation(falseErrLabel, FALSE_BLANK) {
+            if (it.newValue.equals(trueInput.text, true)) {
+                trueInput.setError(SAME_ERROR)
+                SAME_ERROR
+            } else
+                null
+        }
+
+        trueInput.onErrorStatusChange = {
+            if (it == null && falseInput.errReason == SAME_ERROR)
+                falseInput.setError(null)
+        }
+
+
+        falseInput.onErrorStatusChange = {
+            if (it == null && trueInput.errReason == SAME_ERROR)
+                trueInput.setError(null)
+        }
 
 
         content = wrapInFlowPane(
@@ -61,42 +83,10 @@ class BooleanFieldPane(
                 wrapInVBox(Label("False Label"), falseInput, falseErrLabel)
         )
 
-        updateErrHints(trueInput, trueErrLabel, falseInput, falseErrLabel)
-        configureSuper(labelInput.textProperty(), "- Boolean Input")
-    }
+        trueInput.fireValidation()
+        falseInput.fireValidation()
 
-    private fun updateErrHints(trueInput: TextField, trueLabel: Label, falseInput: TextField, falseLabel: Label) {
-        val trueText = trueInput.text
-        val falseText = falseInput.text
-
-        if (trueText.equals(falseText, true)) {
-            trueLabel.apply {
-                text = "Both Labels must be Distinct"
-                isVisible = true
-            }
-            falseLabel.apply {
-                text = "Both Labels must be Distinct"
-                isVisible = true
-            }
-
-            trueInput.pseudoClassStateChanged(ERR_CLASS, true)
-            falseInput.pseudoClassStateChanged(ERR_CLASS, true)
-            return
-        }
-
-        val isTrueTextEmpty = trueText.isEmpty()
-        trueInput.pseudoClassStateChanged(ERR_CLASS, isTrueTextEmpty)
-        trueLabel.apply {
-            text = if (isTrueTextEmpty) "True label must be set" else ""
-            isVisible = isTrueTextEmpty
-        }
-
-        val isFalseTextEmpty = falseText.isEmpty()
-        falseInput.pseudoClassStateChanged(ERR_CLASS, isFalseTextEmpty)
-        falseLabel.apply {
-            text = if (isFalseTextEmpty) "False label must be set" else ""
-            isVisible = isFalseTextEmpty
-        }
+        configureSuper(labelInput.textProperty(), " - Boolean Input")
     }
 
     override fun containsError(): Boolean {
@@ -115,5 +105,11 @@ class BooleanFieldPane(
 
     override fun toRawInput(): RawInputFormBase {
         return RawBooleanField(labelText, trueText.get(), falseText.get(), isLabelDuplicate)
+    }
+
+    private companion object {
+        const val TRUE_BLANK = "True label must be set"
+        const val FALSE_BLANK = "False label must be set"
+        const val SAME_ERROR = "Both Labels must be Distinct"
     }
 }
