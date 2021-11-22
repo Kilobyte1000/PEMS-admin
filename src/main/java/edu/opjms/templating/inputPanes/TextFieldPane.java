@@ -203,10 +203,10 @@ final public class TextFieldPane extends InputPaneBase {
         }
     }*/
 
-    @Override
-    public void setOnLabelChange(BiConsumer<String, String> func) {
-        labelField.setOnTextChange(func);
-    }
+//    @Override
+//    public void setOnLabelChange(BiConsumer<String, String> func) {
+//        labelField.setOnTextChange(func);
+//    }
 
 
     @Override
@@ -265,9 +265,7 @@ final public class TextFieldPane extends InputPaneBase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TextFieldPane)) return false;
-
-        TextFieldPane that = (TextFieldPane) o;
+        if (!(o instanceof TextFieldPane that)) return false;
 
         if (!placeholderTextProperty.equals(that.placeholderTextProperty)) return false;
         if (!selectedTypeProperty.equals(that.selectedTypeProperty)) return false;

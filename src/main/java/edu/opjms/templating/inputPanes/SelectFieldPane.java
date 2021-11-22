@@ -54,16 +54,6 @@ final public class SelectFieldPane extends InputPaneBase {
         nameWrapper.setSpacing(5);
 
         var box = new ComboBox<>(observableArrayList(RawTypes.values()));
-        //allow rotating through values via arrow keys
-        box.setOnKeyPressed(keyEvent -> {
-            final var key = keyEvent.getCode();
-            if ((key == KeyCode.DOWN) || (key == KeyCode.UP)) {
-                final var model = box.getSelectionModel();
-                if (key == KeyCode.DOWN) model.selectNext(); else model.selectPrevious();
-                keyEvent.consume();
-            }
-
-        });
 
         if (rawType == null)
             box.getSelectionModel().selectFirst();

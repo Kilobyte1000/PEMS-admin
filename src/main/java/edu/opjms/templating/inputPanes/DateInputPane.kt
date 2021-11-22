@@ -1,70 +1,43 @@
-package edu.opjms.templating.inputPanes;
+package edu.opjms.templating.inputPanes
 
-import edu.opjms.global.inputForms.PageGeneratorKt;
-import edu.opjms.global.inputForms.RawDateInput;
-import edu.opjms.global.inputForms.RawInputFormBase;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import jfxtras.styles.jmetro.JMetroStyleClass;
-import java.util.Objects;
+import edu.opjms.global.inputForms.genDateErrMessage
+import edu.opjms.global.inputForms.genDateInput
+import edu.opjms.templating.inputPanes.InputPaneBase
+import edu.opjms.global.inputForms.RawInputFormBase
+import edu.opjms.global.inputForms.RawDateInput
+import edu.opjms.templating.inputPanes.TextFieldChange
+import java.util.Objects
+import javafx.beans.value.ObservableValue
+import javafx.scene.layout.HBox
+import jfxtras.styles.jmetro.JMetroStyleClass
+import edu.opjms.templating.inputPanes.DateInputPane
+import javafx.geometry.Pos
+import javafx.scene.control.Label
 
-import static edu.opjms.global.CommonKt.ERROR_CLASS;
+class DateInputPane(label: String = "") : InputPaneBaseKt(label) {
 
-final public class DateInputPane extends InputPaneBase {
+    override val suffix = " - Date Input"
 
-    private static final String SUFFIX = " - Date Input";
-
-    public DateInputPane() {
-        this(null);
+    override fun containsError(): Boolean {
+        return labelText.isBlank() || isDuplicate
     }
 
-    public DateInputPane(String label) {
-        super();
-
-        var labelInput = new TextFieldChange(Objects.requireNonNullElse(label, ""));
-        labelField = labelInput;
-        var labelErr = new Label();
-        this.labelErr = labelErr;
-        labelErr.getStyleClass().add("err");
-
-        if (label == null || label.isBlank()) {
-            isLabelValid = false;
-            labelErr.setText(INVALID_LABEL_ERR);
-            labelInput.pseudoClassStateChanged(ERROR_CLASS, true);
-        }
-        labelInput.textProperty().addListener((observableValue, s, t1) -> {
-            isLabelValid = !t1.isBlank();
-            if (!isLabelDuplicate) {
-                labelErr.setText(isLabelValid? "": INVALID_LABEL_ERR);
-                labelInput.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid);
-            }
-        });
-
-        var wrapper = new HBox(new Label("Label Text: "), labelInput, labelErr);
-        wrapper.setSpacing(8);
-        wrapper.setAlignment(Pos.CENTER_LEFT);
-        wrapper.getStyleClass().add(JMetroStyleClass.BACKGROUND);
-
-        configureSuper(labelInput.textProperty(), SUFFIX);
-
-        setContent(wrapper);
+    override fun generateHTML(id: Int): String {
+        val labelText = labelText.trim()
+        val message = genDateErrMessage(isDuplicate, labelText)
+        return genDateInput(labelText, message)
     }
 
-    @Override
-    public boolean containsError() {
-        return getLabelText().isBlank() || isLabelDuplicate;
+    override fun toRawInput(): RawInputFormBase {
+        return RawDateInput(labelText.trim(), isDuplicate)
     }
 
-    @Override
-    public String generateHTML(int id) {
-        final var labelText = getLabelText().strip();
-        final var message = PageGeneratorKt.genDateErrMessage(isLabelDuplicate, labelText);
-        return PageGeneratorKt.genDateInput(labelText, message);
-    }
 
-    @Override
-    public RawInputFormBase toRawInput() {
-        return new RawDateInput(getLabelText().strip(), isLabelDuplicate);
+    init {
+        val wrapper = HBox(Label("Label Text: "), labelField, errLabel)
+        wrapper.spacing = 8.0
+        wrapper.alignment = Pos.CENTER_LEFT
+        wrapper.styleClass.add(JMetroStyleClass.BACKGROUND)
+        content = wrapper
     }
 }

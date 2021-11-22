@@ -1,6 +1,5 @@
 package edu.opjms.templating.inputPanes
 
-import edu.opjms.global.ERROR_CLASS
 import edu.opjms.global.inputForms.RawBooleanField
 import edu.opjms.global.inputForms.RawInputFormBase
 import edu.opjms.global.inputForms.genBooleanInput
@@ -11,28 +10,13 @@ class BooleanFieldPane(
         label: String = "",
         trueLabel: String = "",
         falseLabel: String = ""
-) : InputPaneBase() {
+) : InputPaneBaseKt(label) {
 
+    override val suffix: String = " - Boolean Input"
     private val trueText: StringProperty
     private val falseText: StringProperty
 
     init {
-        val labelInput = TextFieldChange(label)
-        labelErr = Label().apply { styleClass.add("err") }
-        labelField = labelInput
-        if (label.isBlank()) {
-            isLabelValid = false
-            labelErr.text = INVALID_LABEL_ERR
-            labelInput.pseudoClassStateChanged(ERROR_CLASS, true)
-        }
-        labelInput.textProperty().addListener { _, _, new ->
-            isLabelValid = new.isNotBlank()
-            if (!isLabelDuplicate) {
-                labelErr.text = if (isLabelValid) "" else INVALID_LABEL_ERR
-                labelInput.pseudoClassStateChanged(ERROR_CLASS, !isLabelValid)
-            }
-        }
-
         val trueInput = ValidatedTextField(trueLabel)
         trueText = trueInput.textProperty()
         val trueErrLabel = Label().apply {
@@ -46,8 +30,6 @@ class BooleanFieldPane(
             isWrapText = true
             maxWidthProperty().bind(falseInput.widthProperty())
         }
-
-
 
         trueInput.nonBlankValidation(trueErrLabel, TRUE_BLANK) {
             if (it.newValue.equals(falseInput.text, true)) {
@@ -70,7 +52,6 @@ class BooleanFieldPane(
                 falseInput.setError(null)
         }
 
-
         falseInput.onErrorStatusChange = {
             if (it == null && trueInput.errReason == SAME_ERROR)
                 trueInput.setError(null)
@@ -78,21 +59,19 @@ class BooleanFieldPane(
 
 
         content = wrapInFlowPane(
-                wrapInVBox(Label("Label Text"), labelInput, labelErr),
+                wrapInVBox(Label("Label Text"), labelField, errLabel),
                 wrapInVBox(Label("True Label"), trueInput, trueErrLabel),
                 wrapInVBox(Label("False Label"), falseInput, falseErrLabel)
         )
 
         trueInput.fireValidation()
         falseInput.fireValidation()
-
-        configureSuper(labelInput.textProperty(), " - Boolean Input")
     }
 
     override fun containsError(): Boolean {
         val trueField = trueText.get()
         val falseField = falseText.get()
-        return isLabelDuplicate
+        return isDuplicate
                 || labelText.isBlank()
                 || trueField.isBlank()
                 || falseField.isBlank()
@@ -100,11 +79,11 @@ class BooleanFieldPane(
     }
 
     override fun generateHTML(id: Int): String {
-        return genBooleanInput(isLabelDuplicate, labelText, trueText.get(), falseText.get())
+        return genBooleanInput(isDuplicate, labelText, trueText.get(), falseText.get())
     }
 
     override fun toRawInput(): RawInputFormBase {
-        return RawBooleanField(labelText, trueText.get(), falseText.get(), isLabelDuplicate)
+        return RawBooleanField(labelText, trueText.get(), falseText.get(), isDuplicate)
     }
 
     private companion object {

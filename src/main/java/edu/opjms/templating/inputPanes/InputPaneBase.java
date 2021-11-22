@@ -2,7 +2,6 @@ package edu.opjms.templating.inputPanes;
 
 import edu.opjms.global.CommonKt;
 import edu.opjms.global.inputForms.RawInputFormBase;
-import edu.opjms.templating.ReorderAnimator;
 import edu.opjms.templating.controls.Snackbar;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
@@ -18,7 +17,6 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import kotlin.Pair;
 
-import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
 import static edu.opjms.global.CommonKt.ERROR_CLASS;
@@ -26,8 +24,12 @@ import static java.util.Objects.requireNonNullElse;
 
 public abstract class InputPaneBase extends TitledPane {
 
+    //    protected final static PseudoClass ERR_CLASS = PseudoClass.getPseudoClass("error");
+    //subclasses must set these
+    protected TextFieldChange labelField;
+    protected  Label labelErr;
+
     private StringProperty labelTextProperty;
-    private static final ReorderAnimator reorderAnimator = new ReorderAnimator();
     private String suffix;
     private boolean hasControls = false;
 
@@ -36,17 +38,30 @@ public abstract class InputPaneBase extends TitledPane {
 
     private static final String DUPLICATE_ERR = "The label is Duplicated";
     protected static final String INVALID_LABEL_ERR = "Label must be set";
-//    protected final static PseudoClass ERR_CLASS = PseudoClass.getPseudoClass("error");
 
+    public InputPaneBase() { this(null); }
+
+    public InputPaneBase(String labelText) {
+//        labelField = new ValidatedTextField(requireNonNullElse(labelText, ""));
+        labelErr = new Label();
+
+
+        //all the shortcut keys are added here
+        this.setOnKeyPressed(keyEvent -> {
+            final var keyCode = keyEvent.getCode();
+            //opening and close convenience
+            if (keyCode == KeyCode.LEFT)
+                super.setExpanded(false);
+            else if (keyCode == KeyCode.RIGHT)
+                super.setExpanded(true);
+        });
+    }
     protected boolean isLabelDuplicate = false;
+
     protected boolean isLabelValid = true;
 
-    //subclasses must set these
-    protected TextFieldChange labelField;
-    protected Label labelErr;
-
     protected Pair<TextField, Label> getLabelInput(String labelText) {
-        labelField = new TextFieldChange(requireNonNullElse(labelText, ""));
+
 
         var labelErr = new Label();
         labelErr.getStyleClass().add(CommonKt.ERROR_STYLECLASS);
@@ -68,18 +83,6 @@ public abstract class InputPaneBase extends TitledPane {
         return new Pair<>(labelField, labelErr);
     }
 
-    public InputPaneBase() {
-        //all the shortcut keys are added here
-        this.setOnKeyPressed(keyEvent -> {
-            final var keyCode = keyEvent.getCode();
-            //opening and close convenience
-            if (keyCode == KeyCode.LEFT)
-                super.setExpanded(false);
-            else if (keyCode == KeyCode.RIGHT)
-                super.setExpanded(true);
-        });
-    }
-
     /**
      * <p>
      *     Tells whether the input contains an error which will prevent
@@ -95,9 +98,9 @@ public abstract class InputPaneBase extends TitledPane {
     abstract public boolean containsError();
     abstract public String generateHTML(int id);
 
-    public void setOnLabelChange(BiConsumer<String, String> func) {
-        labelField.setOnTextChange(func);
-    }
+//    public void setOnLabelChange(BiConsumer<String, String> func) {
+//        labelField.setOnTextChange(func);
+//    }
 
     public void setSnackbar(Snackbar snackbar) {
         this.snackbar = snackbar;
@@ -265,15 +268,6 @@ public abstract class InputPaneBase extends TitledPane {
         wrapper.setHgap(20);
         wrapper.setVgap(15);
         return wrapper;
-    }
-
-    /**
-     * This method is used to denote which parent should be animated
-     * when inputPanes are re-ordered using drag and drop
-     * @param pane The pane whose children should be animated
-     */
-    public static void animateParent(Pane pane) {
-        reorderAnimator.observe(pane.getChildren());
     }
 
 
